@@ -1,6 +1,6 @@
 import flet as ft
 
-#import photos
+from photos import handle_file_picker
 
 
 def main(page: ft.Page):
@@ -35,13 +35,6 @@ def main(page: ft.Page):
         elif selected == 4:
             work_area.content = ft.Text("Background", size=24)
         work_area.update()
-
-    def handle_file_picker(e: ft.FilePicker):
-        if e.files:
-            selected_files_text.value = (
-                " ; ".join(map(lambda f: f.name, e.files)) if e.files else "Cancelled!"
-            )
-            selected_files_text.update()
 
     file_picker = ft.FilePicker(on_result=handle_file_picker)
     page.overlay.append(file_picker)
