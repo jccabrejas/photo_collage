@@ -1,0 +1,145 @@
+import flet as ft
+
+#import photos
+
+
+def main(page: ft.Page):
+    page.title = "Photo collage"
+    page.window.width=1000
+    page.window.height=700
+    page.padding=0
+    page.bgcolor = ft.Colors.GREY_600
+    page.theme_mode = ft.ThemeMode.DARK
+    page.theme = ft.Theme(
+        color_scheme_seed=ft.Colors.BLUE,
+        visual_density=ft.VisualDensity.COMFORTABLE,
+        color_scheme=ft.ColorScheme(
+            primary=ft.Colors.BLUE,
+            secondary=ft.Colors.ORANGE,
+            background=ft.Colors.GREY_900,
+            surface=ft.Colors.GREY_800,
+        )
+    )
+    page.vertical_alignment = ft.MainAxisAlignment.START
+
+    def change_view(e):
+        selected = e.control.selected_index
+        if selected == 0:
+            work_area.content = photos_area
+        elif selected == 1:
+            work_area.content = ft.Text("Layouts", size=24)
+        elif selected == 2:
+            work_area.content = ft.Text("New layout", size=24)
+        elif selected == 3:
+            work_area.content = ft.Text("Save collage", size=24)
+        elif selected == 4:
+            work_area.content = ft.Text("Background", size=24)
+        work_area.update()
+
+    def handle_file_picker(e: ft.FilePicker):
+        if e.files:
+            selected_files_text.value = (
+                " ; ".join(map(lambda f: f.name, e.files)) if e.files else "Cancelled!"
+            )
+            selected_files_text.update()
+
+    file_picker = ft.FilePicker(on_result=handle_file_picker)
+    page.overlay.append(file_picker)
+
+    selected_files_text = ft.Text(
+        "No files selected",
+        size=14,
+        color=ft.Colors.WHITE
+    )
+
+    photos_area = ft.Column(
+                controls=[
+                    ft.FilledButton(
+                        text="Select photos",
+                        icon=ft.Icons.FOLDER_OPEN,
+                        color=ft.Colors.WHITE,
+                        bgcolor=ft.Colors.BLUE,
+                        on_click=lambda _: file_picker.pick_files(allow_multiple=True)
+                    ),
+                    selected_files_text,
+                ],
+                width=300,
+                expand=False,
+                alignment=ft.MainAxisAlignment.START,
+            )
+
+    content_area = ft.Container(
+        content=ft.Text("placeholder text", size=24),
+        expand=True,
+        padding=30,
+        width=300,
+        height=page.window.height,
+        bgcolor=ft.Colors.GREY_500,
+    )
+
+    work_area = ft.Container(
+        content=ft.Text("work area text", size=24),
+        expand=False,
+        padding=30,
+        width=200,
+        height=page.window.height,
+    )
+
+    rail = ft.NavigationRail(
+        selected_index=0,
+        label_type=ft.NavigationRailLabelType.ALL,
+        width=100,
+        min_width=100,
+        min_extended_width=100,
+        extended=False,
+        group_alignment=-0.9,
+        height=page.window.height,
+        destinations=[
+            ft.NavigationRailDestination(
+                icon=ft.Icons.PHOTO_LIBRARY,
+                selected_icon=ft.Icons.PHOTO_LIBRARY_OUTLINED,
+                label='Photos'
+            ),
+            ft.NavigationRailDestination(
+                icon=ft.Icons.PAGES,
+                selected_icon=ft.Icons.PAGES_OUTLINED,
+                label="Layouts"
+            ),
+            ft.NavigationRailDestination(
+                icon=ft.Icons.BUILD,
+                selected_icon=ft.Icons.BUILD_OUTLINED,
+                label="New Layout"
+            ),
+            ft.NavigationRailDestination(
+                icon=ft.Icons.SAVE,
+                selected_icon=ft.Icons.SAVE_OUTLINED,
+                label="Save Collage"
+            ),
+            ft.NavigationRailDestination(
+                icon=ft.Icons.COLOR_LENS,
+                selected_icon=ft.Icons.COLOR_LENS_OUTLINED,
+                label="Background"
+            ),
+        ],
+        on_change=change_view,
+        bgcolor=ft.Colors.GREY_900,
+        expand=False,
+    )
+
+    page.add(
+        ft.Row(
+            [
+                rail,
+                ft.VerticalDivider(width=5, thickness=3, color="white"),
+                work_area,
+                ft.VerticalDivider(width=5, thickness=3, color=ft.Colors.BLUE),
+                content_area,
+            ],
+            spacing=5,
+            expand=False,
+            alignment=ft.MainAxisAlignment.START,
+        )
+    )
+
+
+ft.app(main)
