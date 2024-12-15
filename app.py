@@ -101,7 +101,7 @@ def main(page: ft.Page):
                     group="photo",
                     content=ft.Container(
                         content=ft.Image(
-                            src=r"C:\OneDrive\Dokumente\repos\photo_collage\placeholder.png", # TODO solve dependency of path (use src_base64 ?)
+                            src=r".\assets\placeholder.png", # TODO solve dependency of path (use src_base64 ?)
                             width=150,
                             height=150,
                             ),
