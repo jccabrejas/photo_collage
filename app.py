@@ -80,19 +80,18 @@ def main(page: ft.Page):
         e.control.update()
 
     def drag_accept(e):
+        # e.control => DragTarget
+        # e.control.content => Container
+        # e.control.content.content => Image
         src = e.control.page.get_control(e.src_id)
-        e.control.content.content = src.content
         e.control.content.content.src = src.content.src
-        e.control.content.content.fit = ft.ImageFit.SCALE_DOWN
-        e.control.content.border = None
-        e.control.content.content.update()
-        e.control.content.update()
         e.control.update()
-        work_area.update()
-        content_area.update()
+
 
     def drag_leave(e):
-        e.control.content.border = None
+        e.control.content.border = ft.border.all(
+            2, ft.Colors.WHITE if e.data == "true" else ft.Colors.RED
+        )
         e.control.update()
 
     content_area = ft.Container(
@@ -100,11 +99,13 @@ def main(page: ft.Page):
             [
                 ft.DragTarget(
                     group="photo",
-                    content=ft.Image(
-                        src=r"C:\OneDrive\Dokumente\repos\photo_collage\placeholder.webp",
-                        width=150,
-                        height=150,
-                        ),
+                    content=ft.Container(
+                        content=ft.Image(
+                            src=r"C:\OneDrive\Dokumente\repos\photo_collage\placeholder.png", # TODO solve dependency of path (use src_base64 ?)
+                            width=150,
+                            height=150,
+                            ),
+                    ),
                     on_will_accept=drag_will_accept,
                     on_accept=drag_accept,
                     on_leave=drag_leave,
