@@ -4,7 +4,7 @@ import flet as ft
 def main(page: ft.Page):
     page.title = "Photo collage"
     page.window.width = 800
-    page.window.height = 700
+    page.window.height = 800
     page.padding = 0
     page.bgcolor = ft.Colors.GREY_600
     page.theme_mode = ft.ThemeMode.DARK
@@ -24,8 +24,11 @@ def main(page: ft.Page):
         selected = e.control.selected_index
         if selected == 0:
             work_area.content = photos_area
+            content_area.update()
         elif selected == 1:
-            work_area.content = ft.Text("Layouts", size=24)
+            work_area.content = layouts_area
+            # content_area.content = None
+            # content_area.update()
         elif selected == 2:
             work_area.content = ft.Text("New layout", size=24)
         elif selected == 3:
@@ -72,11 +75,30 @@ def main(page: ft.Page):
         scroll="always",
     )
 
+    layouts_area = ft.Column(
+        controls=[
+            ft.Draggable(
+                group="layout",
+                content=ft.Image(
+                    src=r".\assets\layout_01_image.png",
+                    width=100,
+                    height=100,
+                    fit=ft.ImageFit.SCALE_DOWN,
+                    repeat=ft.ImageRepeat.NO_REPEAT,
+                    border_radius=ft.border_radius.all(10),
+                ),
+            ),
+        ],
+        width=300,
+        expand=False,
+        alignment=ft.MainAxisAlignment.START,
+        scroll="always",
+    )
+
     def drag_will_accept(e):
         e.control.content.border = ft.border.all(
             2, ft.Colors.BLACK45 if e.data == "true" else ft.Colors.RED
         )
-        # e.control.content.update()
         e.control.update()
 
     def drag_accept(e):
@@ -87,6 +109,13 @@ def main(page: ft.Page):
         e.control.content.content.src = src.content.src
         e.control.update()
 
+    def drag_accept_layout(e):
+        # e.control => DragTarget
+        # e.control.content => Container
+        # e.control.content.content => Image
+        # src = e.control.page.get_control(e.src_id)
+        e.control.content.content = layout_00_content
+        e.control.update()
 
     def drag_leave(e):
         e.control.content.border = ft.border.all(
@@ -94,29 +123,123 @@ def main(page: ft.Page):
         )
         e.control.update()
 
-    content_area = ft.Container(
-        content=ft.Column(
-            [
-                ft.DragTarget(
-                    group="photo",
-                    content=ft.Container(
-                        content=ft.Image(
-                            src=r".\assets\placeholder.png", # TODO solve dependency of path (use src_base64 ?)
-                            width=150,
-                            height=150,
-                            ),
+    space_between_photos = 10
+    layout_00_content=ft.Stack(
+        [ft.Container(
+            content=ft.DragTarget(
+                group="photo",
+                content=ft.Container(
+                    content=ft.Image(
+                        src=r".\assets\placeholder.png",
                     ),
-                    on_will_accept=drag_will_accept,
-                    on_accept=drag_accept,
-                    on_leave=drag_leave,
+                width=150,
+                height=150,
+                border = ft.border.all(2, ft.Colors.WHITE),
                 ),
-            ]
+                on_will_accept=drag_will_accept,
+                on_accept=drag_accept,
+                on_leave=drag_leave,
             ),
-        expand=True,
+        left=0,
+        top=0,
+        ),
+        ft.Container(
+            content=ft.DragTarget(
+                group="photo",
+                content=ft.Container(
+                    content=ft.Image(
+                        src=r".\assets\placeholder.png",
+                    ),
+                    border = ft.border.all(2, ft.Colors.WHITE),
+                    width=150,
+                    height=150,
+                    ),
+                on_will_accept=drag_will_accept,
+                on_accept=drag_accept,
+                on_leave=drag_leave,
+            ),
+        left=150+space_between_photos,
+        top=0
+        ),
+        ft.Container(
+            content=ft.DragTarget(
+                group="photo",
+                content=ft.Container(
+                    content=ft.Image(
+                        src=r".\assets\placeholder.png",
+                    ),
+                    border = ft.border.all(2, ft.Colors.WHITE),
+                    width=150,
+                    height=300,
+                    ),
+                on_will_accept=drag_will_accept,
+                on_accept=drag_accept,
+                on_leave=drag_leave,
+            ),
+        left=0,
+        top=150 +space_between_photos,
+        ),
+        ft.Container(
+            content=ft.DragTarget(
+                group="photo",
+                content=ft.Container(
+                    content=ft.Image(
+                        src=r".\assets\placeholder.png",
+                    ),
+                    border = ft.border.all(2, ft.Colors.WHITE),
+                    width=150,
+                    height=150,
+                    ),
+                on_will_accept=drag_will_accept,
+                on_accept=drag_accept,
+                on_leave=drag_leave,
+            ),
+        left=150+space_between_photos,
+        top=225+space_between_photos
+        ),
+        ft.Container(
+            content=ft.DragTarget(
+                group="photo",
+                content=ft.Container(
+                    content=ft.Image(
+                        src=r".\assets\placeholder.png",
+                    ),
+                    border = ft.border.all(2, ft.Colors.WHITE),
+                    width=300+space_between_photos,
+                    height=150,
+                    ),
+                on_will_accept=drag_will_accept,
+                on_accept=drag_accept,
+                on_leave=drag_leave,
+            ),
+        left=0,
+        top=450 + 2* space_between_photos),
+        ],
+        width=400,
+        height=400,
+        )
+
+    content_area = ft.Container(
+        content=ft.DragTarget(
+            group="layout",
+            content=ft.Container(
+                content=ft.Image(
+                    src=r".\assets\placeholder.png",
+                ),
+            width=400,
+            height=400,
+            border = ft.border.all(2, ft.Colors.WHITE),
+            ),
+            on_will_accept=drag_will_accept,
+            on_accept=drag_accept_layout,
+            on_leave=drag_leave,
+        ),
+        expand=False,
         padding=30,
-        width=300,
+        width=400,
         height=page.window.height,
         bgcolor=ft.Colors.GREY_500,
+        border = ft.border.all(2, ft.Colors.BLACK),
     )
 
     work_area = ft.Container(
@@ -125,6 +248,7 @@ def main(page: ft.Page):
         padding=30,
         width=200,
         height=page.window.height,
+        border = ft.border.all(2, ft.Colors.BLACK),
     )
 
     rail = ft.NavigationRail(
