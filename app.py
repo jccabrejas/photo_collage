@@ -23,12 +23,10 @@ def main(page: ft.Page):
     def change_view(e):
         selected = e.control.selected_index
         if selected == 0:
+            work_area.content = layouts_area
+        elif selected == 1:
             work_area.content = photos_area
             content_area.update()
-        elif selected == 1:
-            work_area.content = layouts_area
-            # content_area.content = None
-            # content_area.update()
         elif selected == 2:
             work_area.content = ft.Text("New layout", size=24)
         elif selected == 3:
@@ -243,7 +241,7 @@ def main(page: ft.Page):
     )
 
     work_area = ft.Container(
-        content=ft.Text("work area text", size=24),
+        content=layouts_area,
         expand=False,
         padding=30,
         width=200,
@@ -262,14 +260,14 @@ def main(page: ft.Page):
         height=page.window.height,
         destinations=[
             ft.NavigationRailDestination(
-                icon=ft.Icons.PHOTO_LIBRARY,
-                selected_icon=ft.Icons.PHOTO_LIBRARY_OUTLINED,
-                label="Photos",
-            ),
-            ft.NavigationRailDestination(
                 icon=ft.Icons.PAGES,
                 selected_icon=ft.Icons.PAGES_OUTLINED,
                 label="Layouts",
+            ),
+            ft.NavigationRailDestination(
+                icon=ft.Icons.PHOTO_LIBRARY,
+                selected_icon=ft.Icons.PHOTO_LIBRARY_OUTLINED,
+                label="Photos",
             ),
             ft.NavigationRailDestination(
                 icon=ft.Icons.BUILD,
