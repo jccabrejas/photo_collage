@@ -45,7 +45,7 @@ def main(page: ft.Page):
                         src=i.path,
                         width=100,
                         height=100,
-                        fit=ft.ImageFit.SCALE_DOWN,
+                        fit=ft.ImageFit.CONTAIN,
                         repeat=ft.ImageRepeat.NO_REPEAT,
                         border_radius=ft.border_radius.all(10),
                     ),
@@ -105,6 +105,7 @@ def main(page: ft.Page):
         # e.control.content.content => Image
         src = e.control.page.get_control(e.src_id)
         e.control.content.content.src = src.content.src
+        e.control.content.content.offset=ft.transform.Offset(0, 0) # TODO clean up if not required
         e.control.update()
 
     def drag_accept_layout(e):
@@ -129,6 +130,7 @@ def main(page: ft.Page):
                 content=ft.Container(
                     content=ft.Image(
                         src=r".\assets\placeholder.png",
+                    fit=ft.ImageFit.NONE,
                     ),
                 width=150,
                 height=150,
@@ -147,6 +149,7 @@ def main(page: ft.Page):
                 content=ft.Container(
                     content=ft.Image(
                         src=r".\assets\placeholder.png",
+                    fit=ft.ImageFit.NONE,
                     ),
                     border = ft.border.all(2, ft.Colors.WHITE),
                     width=150,
@@ -165,6 +168,7 @@ def main(page: ft.Page):
                 content=ft.Container(
                     content=ft.Image(
                         src=r".\assets\placeholder.png",
+                    fit=ft.ImageFit.NONE,
                     ),
                     border = ft.border.all(2, ft.Colors.WHITE),
                     width=150,
@@ -183,6 +187,7 @@ def main(page: ft.Page):
                 content=ft.Container(
                     content=ft.Image(
                         src=r".\assets\placeholder.png",
+                    fit=ft.ImageFit.NONE,
                     ),
                     border = ft.border.all(2, ft.Colors.WHITE),
                     width=150,
@@ -201,6 +206,7 @@ def main(page: ft.Page):
                 content=ft.Container(
                     content=ft.Image(
                         src=r".\assets\placeholder.png",
+                    fit=ft.ImageFit.NONE,
                     ),
                     border = ft.border.all(2, ft.Colors.WHITE),
                     width=300+space_between_photos,
