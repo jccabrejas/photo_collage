@@ -20,12 +20,13 @@ def main(page: ft.Page):
     )
     page.vertical_alignment = ft.MainAxisAlignment.START
 
+    # Manage RAIL area
     def change_view(e):
         selected = e.control.selected_index
         if selected == 0:
             work_area.content = layouts_work_area
-            content_area.content = layouts_init_content
-            content_area.update()
+            collage_area.content = layouts_init_content
+            collage_area.update()
         elif selected == 1:
             work_area.content = photos_work_area
         elif selected == 2:
@@ -34,10 +35,13 @@ def main(page: ft.Page):
             work_area.content = ft.Text("Save collage", size=24)
         elif selected == 4:
             work_area.content = new_layout_work_content
-            content_area.content = new_layout_area_content
-            content_area.update()
+            collage_area.content = new_layout_area_content
+            collage_area.update()
         work_area.update()
 
+    # Manage WORK area
+
+    ## Manage photos work area
     def handle_file_picker(e: ft.FilePickerResultEvent):
         for i in e.files:
             photos_work_area.controls.append(
@@ -58,7 +62,6 @@ def main(page: ft.Page):
 
     file_picker = ft.FilePicker(on_result=handle_file_picker)
     page.overlay.append(file_picker)
-
     photos_work_area = ft.Column(
         controls=[
             ft.FilledButton(
@@ -75,6 +78,7 @@ def main(page: ft.Page):
         scroll="always",
     )
 
+    ## Manage layouts work area
     layouts_work_area = ft.Column(
         controls=[
             ft.Draggable(
@@ -95,6 +99,11 @@ def main(page: ft.Page):
         scroll="always",
     )
 
+    ## Manage Background work area
+
+    ## Manage Save Collage work area
+
+    ## Manage New Layout work area
     new_collage_width = ft.TextField(label="Width", prefix_icon=ft.Icons.WIDTH_NORMAL_SHARP)
     new_collage_height = ft.TextField(label="Height", prefix_icon=ft.Icons.HEIGHT)
     new_collage_name = ft.TextField(label="Name", prefix_icon=ft.Icons.DRIVE_FILE_RENAME_OUTLINE_SHARP)
@@ -129,6 +138,9 @@ def main(page: ft.Page):
             ]
     )
 
+    # Manage COLLAGE area
+
+    ## Manage Layouts and Photos collage areaa
     def drag_will_accept(e):
         e.control.content.border = ft.border.all(
             2, ft.Colors.BLACK45 if e.data == "true" else ft.Colors.RED
@@ -158,6 +170,7 @@ def main(page: ft.Page):
         )
         e.control.update()
 
+    ## Manage New Layout collage area
     def edit_photo(e):
         pass
 
@@ -300,7 +313,9 @@ def main(page: ft.Page):
             on_leave=drag_leave,
         )
 
-    content_area = ft.Container(
+    # Manage PAGE
+
+    collage_area = ft.Container(
         content=layouts_init_content,
         expand=False,
         padding=30,
@@ -367,7 +382,7 @@ def main(page: ft.Page):
                 ft.VerticalDivider(width=5, thickness=3, color="white"),
                 work_area,
                 ft.VerticalDivider(width=5, thickness=3, color=ft.Colors.BLUE),
-                content_area,
+                collage_area,
             ],
             spacing=5,
             expand=False,
