@@ -23,22 +23,24 @@ def main(page: ft.Page):
     def change_view(e):
         selected = e.control.selected_index
         if selected == 0:
-            work_area.content = layouts_area
-        elif selected == 1:
-            work_area.content = photos_area
+            work_area.content = layouts_work_area
+            content_area.content = layouts_init_content
             content_area.update()
+        elif selected == 1:
+            work_area.content = photos_work_area
         elif selected == 2:
-            work_area.content = ft.Text("New layout", size=24)
+            work_area.content = ft.Text("Background", size=24)
         elif selected == 3:
             work_area.content = ft.Text("Save collage", size=24)
         elif selected == 4:
-            work_area.content = ft.Text("Background", size=24)
+            work_area.content = new_layout_work_content
+            content_area.content = new_layout_area_content
+            content_area.update()
         work_area.update()
 
     def handle_file_picker(e: ft.FilePickerResultEvent):
-
         for i in e.files:
-            photos_area.controls.append(
+            photos_work_area.controls.append(
                 ft.Draggable(
                     group="photo",
                     content=ft.Image(
@@ -51,13 +53,13 @@ def main(page: ft.Page):
                     ),
                 )
             )
-            photos_area.controls.append(ft.Text(value=i.name))
-            photos_area.update()
+            photos_work_area.controls.append(ft.Text(value=i.name))
+            photos_work_area.update()
 
     file_picker = ft.FilePicker(on_result=handle_file_picker)
     page.overlay.append(file_picker)
 
-    photos_area = ft.Column(
+    photos_work_area = ft.Column(
         controls=[
             ft.FilledButton(
                 text="Select photos",
@@ -73,7 +75,7 @@ def main(page: ft.Page):
         scroll="always",
     )
 
-    layouts_area = ft.Column(
+    layouts_work_area = ft.Column(
         controls=[
             ft.Draggable(
                 group="layout",
@@ -91,6 +93,40 @@ def main(page: ft.Page):
         expand=False,
         alignment=ft.MainAxisAlignment.START,
         scroll="always",
+    )
+
+    new_collage_width = ft.TextField(label="Width", prefix_icon=ft.Icons.WIDTH_NORMAL_SHARP)
+    new_collage_height = ft.TextField(label="Height", prefix_icon=ft.Icons.HEIGHT)
+    new_collage_name = ft.TextField(label="Name", prefix_icon=ft.Icons.DRIVE_FILE_RENAME_OUTLINE_SHARP)
+    new_collage_tags = ft.TextField(label="Tags (comma sep)", prefix_icon=ft.Icons.TAG)
+    
+    def add_collage_area(e):
+        pass
+    
+    def save_collage_area(e):
+        pass
+
+    new_layout_work_content = ft.Column(
+        controls=[
+            new_collage_width,
+            new_collage_height,
+            ft.FilledButton(
+                text="Create collage area",
+                icon=ft.Icons.ADD_PHOTO_ALTERNATE,
+                color=ft.Colors.WHITE,
+                bgcolor=ft.Colors.BLUE,
+                on_click=add_collage_area,
+            ),
+            new_collage_name,
+            new_collage_tags,
+            ft.FilledButton(
+                text="Save collage",
+                icon=ft.Icons.ADD_PHOTO_ALTERNATE,
+                color=ft.Colors.WHITE,
+                bgcolor=ft.Colors.BLUE,
+                on_click=save_collage_area,
+            ),
+            ]
     )
 
     def drag_will_accept(e):
@@ -122,6 +158,31 @@ def main(page: ft.Page):
         )
         e.control.update()
 
+    def edit_photo(e):
+        pass
+
+    def change_position(e):
+        pass
+
+    new_layout_area_content = ft.Container(
+        ft.Stack(
+        [
+            ft.GestureDetector(
+                drag_interval=10,
+                top=10,
+                left=10,
+                mouse_cursor=ft.MouseCursor.MOVE,
+                on_pan_update=change_position,
+                content=ft.Container(
+                    border=ft.border.all(5,"white"),
+                    width=200,
+                    height=200,
+                    visible=True
+                )
+            )
+            ]
+        ))
+ 
     space_between_photos = 10
     layout_00_content=ft.Stack(
         [ft.Container(
@@ -142,6 +203,7 @@ def main(page: ft.Page):
             ),
         left=0,
         top=0,
+        on_click=edit_photo
         ),
         ft.Container(
             content=ft.DragTarget(
@@ -222,14 +284,13 @@ def main(page: ft.Page):
         width=400,
         height=400,
         )
-
-    content_area = ft.Container(
-        content=ft.DragTarget(
+    layouts_init_content = ft.DragTarget(
             group="layout",
             content=ft.Container(
-                content=ft.Image(
-                    src=r".\assets\placeholder.png",
-                ),
+                bgcolor=ft.Colors.WHITE,
+                # content=ft.Image(
+                #     src=r".\assets\placeholder.png",
+                # ),
             width=400,
             height=400,
             border = ft.border.all(2, ft.Colors.WHITE),
@@ -237,7 +298,10 @@ def main(page: ft.Page):
             on_will_accept=drag_will_accept,
             on_accept=drag_accept_layout,
             on_leave=drag_leave,
-        ),
+        )
+
+    content_area = ft.Container(
+        content=layouts_init_content,
         expand=False,
         padding=30,
         width=400,
@@ -247,7 +311,7 @@ def main(page: ft.Page):
     )
 
     work_area = ft.Container(
-        content=layouts_area,
+        content=layouts_work_area,
         expand=False,
         padding=30,
         width=200,
@@ -276,9 +340,9 @@ def main(page: ft.Page):
                 label="Photos",
             ),
             ft.NavigationRailDestination(
-                icon=ft.Icons.BUILD,
-                selected_icon=ft.Icons.BUILD_OUTLINED,
-                label="New Layout",
+                icon=ft.Icons.COLOR_LENS,
+                selected_icon=ft.Icons.COLOR_LENS_OUTLINED,
+                label="Background",
             ),
             ft.NavigationRailDestination(
                 icon=ft.Icons.SAVE,
@@ -286,9 +350,9 @@ def main(page: ft.Page):
                 label="Save Collage",
             ),
             ft.NavigationRailDestination(
-                icon=ft.Icons.COLOR_LENS,
-                selected_icon=ft.Icons.COLOR_LENS_OUTLINED,
-                label="Background",
+                icon=ft.Icons.BUILD,
+                selected_icon=ft.Icons.BUILD_OUTLINED,
+                label="New Layout",
             ),
         ],
         on_change=change_view,
@@ -312,4 +376,4 @@ def main(page: ft.Page):
     )
 
 
-ft.app(main)
+ft.app(target=main)
