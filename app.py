@@ -1,5 +1,6 @@
+import base64
 import flet as ft
-
+import yaml
 
 def main(page: ft.Page):
     page.title = "Photo collage"
@@ -104,30 +105,17 @@ def main(page: ft.Page):
     ## Manage Save Collage work area
 
     ## Manage New Layout work area
-    new_collage_width = ft.TextField(label="Width", prefix_icon=ft.Icons.WIDTH_NORMAL_SHARP)
+    new_collage_width = ft.TextField(
+        label="Width", prefix_icon=ft.Icons.WIDTH_NORMAL_SHARP
+    )
     new_collage_height = ft.TextField(label="Height", prefix_icon=ft.Icons.HEIGHT)
-    new_collage_name = ft.TextField(label="Name", prefix_icon=ft.Icons.DRIVE_FILE_RENAME_OUTLINE_SHARP)
+    new_collage_name = ft.TextField(
+        label="Name", prefix_icon=ft.Icons.DRIVE_FILE_RENAME_OUTLINE_SHARP
+    )
     new_collage_tags = ft.TextField(label="Tags (comma sep)", prefix_icon=ft.Icons.TAG)
-    
-    new_layout_area_content = ft.Container(
-        ft.Stack(
-        # [
-        #     ft.GestureDetector(
-        #         drag_interval=10,
-        #         top=10,
-        #         left=10,
-        #         mouse_cursor=ft.MouseCursor.MOVE,
-        #         on_pan_update=change_position,
-        #         content=ft.Container(
-        #             border=ft.border.all(5,"white"),
-        #             width=200,
-        #             height=200,
-        #             visible=True
-        #         )
-        #     )
-        #     ]
-        ))
- 
+
+    new_layout_area_content = ft.Container(ft.Stack())
+
     def add_collage_area(e):
         new_layout_area_content.content.controls.append(
             ft.GestureDetector(
@@ -137,18 +125,67 @@ def main(page: ft.Page):
                 mouse_cursor=ft.MouseCursor.MOVE,
                 on_pan_update=change_position,
                 content=ft.Container(
-                    border=ft.border.all(5,"white"),
-                    width=int(new_collage_width.value) if new_collage_width.value!='' else 100,
-                    height=int(new_collage_height.value) if new_collage_height.value!='' else 100,
-                    visible=True
-                )
+                    border=ft.border.all(5, "white"),
+                    width=(
+                        int(new_collage_width.value)
+                        if new_collage_width.value != ""
+                        else 100
+                    ),
+                    height=(
+                        int(new_collage_height.value)
+                        if new_collage_height.value != ""
+                        else 100
+                    ),
+                    visible=True,
+                ),
             )
         )
         new_layout_area_content.update()
         page.update()
-    
-    def save_collage_area(e):
-        pass
+
+    def save_layout(e):
+        filename= '.\\assets\\layouts\\' + new_collage_name.value + '.yml'
+        data = dict()
+        data['layout']=dict()
+        data['layout']['name'] = new_collage_name.value.replace(' ','_')
+        data['layout']['tags'] = new_collage_tags.value.replace(' ','').replace(',,',',')
+        data['layout']['src'] = 'to be done' # TODO screenshot the collage, convert to base64 and store here to be used as thumbnail
+        data['layout']['controls'] = dict()
+        for index, c in enumerate(new_layout_area_content.content.controls):
+            data['layout']['controls'][index] = dict()
+            data['layout']['controls'][index]['top'] = c.top
+            data['layout']['controls'][index]['left'] = c.left
+            data['layout']['controls'][index]['width'] = c.content.width
+            data['layout']['controls'][index]['height'] = c.content.height
+
+        with open(filename, 'w') as file:
+            yaml.safe_dump(data, file)
+
+    def load_layout(filename: str) -> ft.Stack:
+        with open(filename, 'r') as file:
+            data = yaml.safe_load(file)
+        result = list()
+        for _, v in data['layout']['controls'].items():
+            collage_item = ft.Container()
+            collage_item.content = ft.DragTarget(
+                group='photo',
+                on_will_accept=drag_will_accept,
+                on_accept=drag_accept,
+                on_leave=drag_leave,
+                content = ft.Container(
+                    content=ft.Image(
+                        src=r".\assets\placeholder.png",
+                        fit=ft.ImageFit.NONE,
+                    ),
+                    width=v['width'],
+                    height=v['height'],
+                    border=ft.border.all(2, ft.Colors.WHITE),
+                    ),
+                )
+            collage_item.top=v['top']
+            collage_item.left=v['left']
+            result.append(collage_item)
+        return ft.Stack(result, width=400, height=400)
 
     new_layout_work_content = ft.Column(
         controls=[
@@ -164,13 +201,13 @@ def main(page: ft.Page):
             new_collage_name,
             new_collage_tags,
             ft.FilledButton(
-                text="Save collage",
+                text="Save layout",
                 icon=ft.Icons.SAVE_OUTLINED,
                 color=ft.Colors.WHITE,
                 bgcolor=ft.Colors.BLUE,
-                on_click=save_collage_area,
+                on_click=save_layout,
             ),
-            ]
+        ]
     )
 
     # Manage COLLAGE area
@@ -188,7 +225,9 @@ def main(page: ft.Page):
         # e.control.content.content => Image
         src = e.control.page.get_control(e.src_id)
         e.control.content.content.src = src.content.src
-        e.control.content.content.offset=ft.transform.Offset(0, 0) # TODO clean up if not required
+        e.control.content.content.offset = ft.transform.Offset(
+            0, 0
+        )  # TODO clean up if not required
         e.control.update()
 
     def drag_accept_layout(e):
@@ -209,131 +248,131 @@ def main(page: ft.Page):
         pass
 
     space_between_photos = 10
-    layout_00_content=ft.Stack(
-        [ft.Container(
-            content=ft.DragTarget(
-                group="photo",
-                content=ft.Container(
-                    content=ft.Image(
-                        src=r".\assets\placeholder.png",
-                    fit=ft.ImageFit.NONE,
-                    ),
-                width=150,
-                height=150,
-                border = ft.border.all(2, ft.Colors.WHITE),
-                ),
-                on_will_accept=drag_will_accept,
-                on_accept=drag_accept,
-                on_leave=drag_leave,
-            ),
-        left=0,
-        top=0,
-        on_click=edit_photo
-        ),
-        ft.Container(
-            content=ft.DragTarget(
-                group="photo",
-                content=ft.Container(
-                    content=ft.Image(
-                        src=r".\assets\placeholder.png",
-                    fit=ft.ImageFit.NONE,
-                    ),
-                    border = ft.border.all(2, ft.Colors.WHITE),
-                    width=150,
-                    height=150,
-                    ),
-                on_will_accept=drag_will_accept,
-                on_accept=drag_accept,
-                on_leave=drag_leave,
-            ),
-        left=150+space_between_photos,
-        top=0
-        ),
-        ft.Container(
-            content=ft.DragTarget(
-                group="photo",
-                content=ft.Container(
-                    content=ft.Image(
-                        src=r".\assets\placeholder.png",
-                    fit=ft.ImageFit.NONE,
-                    ),
-                    border = ft.border.all(2, ft.Colors.WHITE),
-                    width=150,
-                    height=300,
-                    ),
-                on_will_accept=drag_will_accept,
-                on_accept=drag_accept,
-                on_leave=drag_leave,
-            ),
-        left=0,
-        top=150 +space_between_photos,
-        ),
-        ft.Container(
-            content=ft.DragTarget(
-                group="photo",
-                content=ft.Container(
-                    content=ft.Image(
-                        src=r".\assets\placeholder.png",
-                    fit=ft.ImageFit.NONE,
-                    ),
-                    border = ft.border.all(2, ft.Colors.WHITE),
-                    width=150,
-                    height=150,
-                    ),
-                on_will_accept=drag_will_accept,
-                on_accept=drag_accept,
-                on_leave=drag_leave,
-            ),
-        left=150+space_between_photos,
-        top=225+space_between_photos
-        ),
-        ft.Container(
-            content=ft.DragTarget(
-                group="photo",
-                content=ft.Container(
-                    content=ft.Image(
-                        src=r".\assets\placeholder.png",
-                    fit=ft.ImageFit.NONE,
-                    ),
-                    border = ft.border.all(2, ft.Colors.WHITE),
-                    width=300+space_between_photos,
-                    height=150,
-                    ),
-                on_will_accept=drag_will_accept,
-                on_accept=drag_accept,
-                on_leave=drag_leave,
-            ),
-        left=0,
-        top=450 + 2* space_between_photos),
-        ],
-        width=400,
-        height=400,
-        )
+    layout_library = []
+    layout_00_content = load_layout(r'.\assets\layouts\test.yml')
+    # layout_00_content = ft.Stack(
+    #     [
+    #         ft.Container(
+    #             content=ft.DragTarget(
+    #                 group="photo",
+    #                 content=ft.Container(
+    #                     content=ft.Image(
+    #                         src=r".\assets\placeholder.png",
+    #                         fit=ft.ImageFit.NONE,
+    #                     ),
+    #                     width=150,
+    #                     height=150,
+    #                     border=ft.border.all(2, ft.Colors.WHITE),
+    #                 ),
+    #                 on_will_accept=drag_will_accept,
+    #                 on_accept=drag_accept,
+    #                 on_leave=drag_leave,
+    #             ),
+    #             left=0,
+    #             top=0,
+    #             on_click=edit_photo,
+    #         ),
+    #         ft.Container(
+    #             content=ft.DragTarget(
+    #                 group="photo",
+    #                 content=ft.Container(
+    #                     content=ft.Image(
+    #                         src=r".\assets\placeholder.png",
+    #                         fit=ft.ImageFit.NONE,
+    #                     ),
+    #                     border=ft.border.all(2, ft.Colors.WHITE),
+    #                     width=150,
+    #                     height=150,
+    #                 ),
+    #                 on_will_accept=drag_will_accept,
+    #                 on_accept=drag_accept,
+    #                 on_leave=drag_leave,
+    #             ),
+    #             left=150 + space_between_photos,
+    #             top=0,
+    #         ),
+    #         ft.Container(
+    #             content=ft.DragTarget(
+    #                 group="photo",
+    #                 content=ft.Container(
+    #                     content=ft.Image(
+    #                         src=r".\assets\placeholder.png",
+    #                         fit=ft.ImageFit.NONE,
+    #                     ),
+    #                     border=ft.border.all(2, ft.Colors.WHITE),
+    #                     width=150,
+    #                     height=300,
+    #                 ),
+    #                 on_will_accept=drag_will_accept,
+    #                 on_accept=drag_accept,
+    #                 on_leave=drag_leave,
+    #             ),
+    #             left=0,
+    #             top=150 + space_between_photos,
+    #         ),
+    #         ft.Container(
+    #             content=ft.DragTarget(
+    #                 group="photo",
+    #                 content=ft.Container(
+    #                     content=ft.Image(
+    #                         src=r".\assets\placeholder.png",
+    #                         fit=ft.ImageFit.NONE,
+    #                     ),
+    #                     border=ft.border.all(2, ft.Colors.WHITE),
+    #                     width=150,
+    #                     height=150,
+    #                 ),
+    #                 on_will_accept=drag_will_accept,
+    #                 on_accept=drag_accept,
+    #                 on_leave=drag_leave,
+    #             ),
+    #             left=150 + space_between_photos,
+    #             top=225 + space_between_photos,
+    #         ),
+    #         ft.Container(
+    #             content=ft.DragTarget(
+    #                 group="photo",
+    #                 content=ft.Container(
+    #                     content=ft.Image(
+    #                         src=r".\assets\placeholder.png",
+    #                         fit=ft.ImageFit.NONE,
+    #                     ),
+    #                     border=ft.border.all(2, ft.Colors.WHITE),
+    #                     width=300 + space_between_photos,
+    #                     height=150,
+    #                 ),
+    #                 on_will_accept=drag_will_accept,
+    #                 on_accept=drag_accept,
+    #                 on_leave=drag_leave,
+    #             ),
+    #             left=0,
+    #             top=450 + 2 * space_between_photos,
+    #         ),
+    #     ],
+    #     width=400,
+    #     height=400,
+    # )
     layouts_init_content = ft.DragTarget(
-            group="layout",
-            content=ft.Container(
-                bgcolor=ft.Colors.WHITE,
-                # content=ft.Image(
-                #     src=r".\assets\placeholder.png",
-                # ),
+        group="layout",
+        content=ft.Container(
+            bgcolor=ft.Colors.WHITE,
             width=400,
             height=400,
-            border = ft.border.all(2, ft.Colors.WHITE),
-            ),
-            on_will_accept=drag_will_accept,
-            on_accept=drag_accept_layout,
-            on_leave=drag_leave,
-        )
+            border=ft.border.all(2, ft.Colors.WHITE),
+        ),
+        on_will_accept=drag_will_accept,
+        on_accept=drag_accept_layout,
+        on_leave=drag_leave,
+    )
 
     ## Manage New Layout collage area
 
-
-    def change_position(e:ft.DragUpdateEvent):
-        e.control.top = max(0,e.control.top + e.delta_y)
-        e.control.left = max(0,e.control.left + e.delta_x)
+    def change_position(e: ft.DragUpdateEvent):
+        e.control.top = max(0, e.control.top + e.delta_y)
+        e.control.left = max(0, e.control.left + e.delta_x)
         page.update()
 
-     # Manage PAGE
+    # Manage PAGE
 
     collage_area = ft.Container(
         content=layouts_init_content,
@@ -342,7 +381,7 @@ def main(page: ft.Page):
         width=400,
         height=page.window.height,
         bgcolor=ft.Colors.GREY_500,
-        border = ft.border.all(2, ft.Colors.BLACK),
+        border=ft.border.all(2, ft.Colors.BLACK),
     )
 
     work_area = ft.Container(
@@ -351,7 +390,7 @@ def main(page: ft.Page):
         padding=30,
         width=200,
         height=page.window.height,
-        border = ft.border.all(2, ft.Colors.BLACK),
+        border=ft.border.all(2, ft.Colors.BLACK),
     )
 
     rail = ft.NavigationRail(
