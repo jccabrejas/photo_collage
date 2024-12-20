@@ -1,5 +1,6 @@
 import base64
 import flet as ft
+import os
 import yaml
 
 def main(page: ft.Page):
@@ -81,7 +82,14 @@ def main(page: ft.Page):
 
     ## Manage layouts work area
     layouts_work_area = ft.Column(
-        controls=[
+        controls=[],
+        width=300,
+        expand=False,
+        alignment=ft.MainAxisAlignment.START,
+        scroll="always",
+    )
+    for filename in os.listdir(r'.\assets\layouts'):
+        layouts_work_area.controls.append(
             ft.Draggable(
                 group="layout",
                 content=ft.Image(
@@ -92,13 +100,11 @@ def main(page: ft.Page):
                     repeat=ft.ImageRepeat.NO_REPEAT,
                     border_radius=ft.border_radius.all(10),
                 ),
-            ),
-        ],
-        width=300,
-        expand=False,
-        alignment=ft.MainAxisAlignment.START,
-        scroll="always",
-    )
+            )
+        )
+        layouts_work_area.controls.append(
+            ft.Text(filename)
+        )
 
     ## Manage Background work area
 
