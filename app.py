@@ -142,15 +142,7 @@ def main(page: ft.Page):
 
     def refresh_layouts(_):
         layouts_work_area.controls = list()
-        # layouts_work_area.controls.append(
-        #     ft.FilledButton(
-        #         text="Refresh Layouts",
-        #         icon=ft.Icons.FOLDER_OPEN,
-        #         color=ft.Colors.WHITE,
-        #         bgcolor=ft.Colors.BLUE,
-        #         on_click=refresh_layouts,
-        #     ),
-        # )
+
         for filename in os.listdir(r'.\assets\layouts'):
             layouts_work_area.controls.append(
                 ft.Draggable(
@@ -169,18 +161,11 @@ def main(page: ft.Page):
             layouts_work_area.controls.append(
                 ft.Text(filename)
             )
+
         # work_area.update()
 
     layouts_work_area = ft.Column(
-        controls=[            
-            # ft.FilledButton(
-            #     text="Refresh Layouts",
-            #     icon=ft.Icons.FOLDER_OPEN,
-            #     color=ft.Colors.WHITE,
-            #     bgcolor=ft.Colors.BLUE,
-            #     on_click=refresh_layouts,
-            # ),
-        ],
+        controls=[],
         width=300,
         expand=False,
         alignment=ft.MainAxisAlignment.START,
