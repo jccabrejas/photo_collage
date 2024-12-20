@@ -26,6 +26,7 @@ def main(page: ft.Page):
     def change_view(e):
         selected = e.control.selected_index
         if selected == 0:
+            refresh_layouts('')
             work_area.content = layouts_work_area
             collage_area.content = layouts_init_content
             collage_area.update()
@@ -139,32 +140,54 @@ def main(page: ft.Page):
             result.append(collage_item)
         return ft.Stack(result, width=400, height=400)
 
+    def refresh_layouts(_):
+        layouts_work_area.controls = list()
+        # layouts_work_area.controls.append(
+        #     ft.FilledButton(
+        #         text="Refresh Layouts",
+        #         icon=ft.Icons.FOLDER_OPEN,
+        #         color=ft.Colors.WHITE,
+        #         bgcolor=ft.Colors.BLUE,
+        #         on_click=refresh_layouts,
+        #     ),
+        # )
+        for filename in os.listdir(r'.\assets\layouts'):
+            layouts_work_area.controls.append(
+                ft.Draggable(
+                    group="layout",
+                    content=ft.Image(
+                        src=r".\assets\layout_01_image.png",
+                        width=100,
+                        height=100,
+                        fit=ft.ImageFit.SCALE_DOWN,
+                        repeat=ft.ImageRepeat.NO_REPEAT,
+                        border_radius=ft.border_radius.all(10),
+                    ),
+                    data=load_layout('.\\assets\\layouts\\'+filename),
+                )
+            )
+            layouts_work_area.controls.append(
+                ft.Text(filename)
+            )
+        # work_area.update()
+
     layouts_work_area = ft.Column(
-        controls=[],
+        controls=[            
+            # ft.FilledButton(
+            #     text="Refresh Layouts",
+            #     icon=ft.Icons.FOLDER_OPEN,
+            #     color=ft.Colors.WHITE,
+            #     bgcolor=ft.Colors.BLUE,
+            #     on_click=refresh_layouts,
+            # ),
+        ],
         width=300,
         expand=False,
         alignment=ft.MainAxisAlignment.START,
         scroll="always",
     )
-
-    for filename in os.listdir(r'.\assets\layouts'):
-        layouts_work_area.controls.append(
-            ft.Draggable(
-                group="layout",
-                content=ft.Image(
-                    src=r".\assets\layout_01_image.png",
-                    width=100,
-                    height=100,
-                    fit=ft.ImageFit.SCALE_DOWN,
-                    repeat=ft.ImageRepeat.NO_REPEAT,
-                    border_radius=ft.border_radius.all(10),
-                ),
-                data=load_layout('.\\assets\\layouts\\'+filename),
-            )
-        )
-        layouts_work_area.controls.append(
-            ft.Text(filename)
-        )
+    # page.add(layouts_work_area)
+    refresh_layouts('')
 
     ## Manage Background work area
 
