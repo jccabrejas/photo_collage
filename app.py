@@ -44,6 +44,38 @@ def main(page: ft.Page):
     # Manage WORK area
 
     ## Manage photos work area
+    def drag_will_accept(e):
+        e.control.content.border = ft.border.all(
+            2, ft.Colors.BLACK45 if e.data == "true" else ft.Colors.RED
+        )
+        e.control.update()
+
+    def drag_accept(e):
+        # e.control => DragTarget
+        # e.control.content => Container
+        # e.control.content.content => Image
+        src = e.control.page.get_control(e.src_id)
+        e.control.content.content.src = src.content.src
+        e.control.content.content.offset = ft.transform.Offset(
+            0, 0
+        )  # TODO clean up if not required
+        e.control.update()
+
+    def drag_accept_layout(e):
+        # e.control => DragTarget
+        # e.control.content => Container
+        # e.control.content.content => Image
+        src = e.control.page.get_control(e.src_id)
+        e.control.content.content = src.data
+        # e.control.content.content = layout_00_content
+        e.control.update()
+
+    def drag_leave(e):
+        e.control.content.border = ft.border.all(
+            2, ft.Colors.WHITE if e.data == "true" else ft.Colors.RED
+        )
+        e.control.update()
+
     def handle_file_picker(e: ft.FilePickerResultEvent):
         for i in e.files:
             photos_work_area.controls.append(
@@ -81,6 +113,32 @@ def main(page: ft.Page):
     )
 
     ## Manage layouts work area
+    def load_layout(filename: str) -> ft.Stack:
+        with open(filename, 'r') as file:
+            data = yaml.safe_load(file)
+        result = list()
+        for _, v in data['layout']['controls'].items():
+            collage_item = ft.Container()
+            collage_item.content = ft.DragTarget(
+                group='photo',
+                on_will_accept=drag_will_accept,
+                on_accept=drag_accept,
+                on_leave=drag_leave,
+                content = ft.Container(
+                    content=ft.Image(
+                        src=r".\assets\placeholder.png",
+                        fit=ft.ImageFit.NONE,
+                    ),
+                    width=v['width'],
+                    height=v['height'],
+                    border=ft.border.all(2, ft.Colors.WHITE),
+                    ),
+                )
+            collage_item.top=v['top']
+            collage_item.left=v['left']
+            result.append(collage_item)
+        return ft.Stack(result, width=400, height=400)
+
     layouts_work_area = ft.Column(
         controls=[],
         width=300,
@@ -88,6 +146,7 @@ def main(page: ft.Page):
         alignment=ft.MainAxisAlignment.START,
         scroll="always",
     )
+
     for filename in os.listdir(r'.\assets\layouts'):
         layouts_work_area.controls.append(
             ft.Draggable(
@@ -100,6 +159,7 @@ def main(page: ft.Page):
                     repeat=ft.ImageRepeat.NO_REPEAT,
                     border_radius=ft.border_radius.all(10),
                 ),
+                data=load_layout('.\\assets\\layouts\\'+filename),
             )
         )
         layouts_work_area.controls.append(
@@ -167,32 +227,6 @@ def main(page: ft.Page):
         with open(filename, 'w') as file:
             yaml.safe_dump(data, file)
 
-    def load_layout(filename: str) -> ft.Stack:
-        with open(filename, 'r') as file:
-            data = yaml.safe_load(file)
-        result = list()
-        for _, v in data['layout']['controls'].items():
-            collage_item = ft.Container()
-            collage_item.content = ft.DragTarget(
-                group='photo',
-                on_will_accept=drag_will_accept,
-                on_accept=drag_accept,
-                on_leave=drag_leave,
-                content = ft.Container(
-                    content=ft.Image(
-                        src=r".\assets\placeholder.png",
-                        fit=ft.ImageFit.NONE,
-                    ),
-                    width=v['width'],
-                    height=v['height'],
-                    border=ft.border.all(2, ft.Colors.WHITE),
-                    ),
-                )
-            collage_item.top=v['top']
-            collage_item.left=v['left']
-            result.append(collage_item)
-        return ft.Stack(result, width=400, height=400)
-
     new_layout_work_content = ft.Column(
         controls=[
             new_collage_width,
@@ -218,43 +252,13 @@ def main(page: ft.Page):
 
     # Manage COLLAGE area
 
-    ## Manage Layouts and Photos collage areaa
-    def drag_will_accept(e):
-        e.control.content.border = ft.border.all(
-            2, ft.Colors.BLACK45 if e.data == "true" else ft.Colors.RED
-        )
-        e.control.update()
-
-    def drag_accept(e):
-        # e.control => DragTarget
-        # e.control.content => Container
-        # e.control.content.content => Image
-        src = e.control.page.get_control(e.src_id)
-        e.control.content.content.src = src.content.src
-        e.control.content.content.offset = ft.transform.Offset(
-            0, 0
-        )  # TODO clean up if not required
-        e.control.update()
-
-    def drag_accept_layout(e):
-        # e.control => DragTarget
-        # e.control.content => Container
-        # e.control.content.content => Image
-        # src = e.control.page.get_control(e.src_id)
-        e.control.content.content = layout_00_content
-        e.control.update()
-
-    def drag_leave(e):
-        e.control.content.border = ft.border.all(
-            2, ft.Colors.WHITE if e.data == "true" else ft.Colors.RED
-        )
-        e.control.update()
+    ## Manage Layouts and Photos collage area
 
     def edit_photo(e):
         pass
 
     space_between_photos = 10
-    layout_library = []
+    layout_library = [load_layout('.\\assets\\layouts\\'+f) for f in os.listdir(r'.\assets\layouts')]
     layout_00_content = load_layout(r'.\assets\layouts\test.yml')
     # layout_00_content = ft.Stack(
     #     [
