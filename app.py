@@ -109,8 +109,43 @@ def main(page: ft.Page):
     new_collage_name = ft.TextField(label="Name", prefix_icon=ft.Icons.DRIVE_FILE_RENAME_OUTLINE_SHARP)
     new_collage_tags = ft.TextField(label="Tags (comma sep)", prefix_icon=ft.Icons.TAG)
     
+    new_layout_area_content = ft.Container(
+        ft.Stack(
+        # [
+        #     ft.GestureDetector(
+        #         drag_interval=10,
+        #         top=10,
+        #         left=10,
+        #         mouse_cursor=ft.MouseCursor.MOVE,
+        #         on_pan_update=change_position,
+        #         content=ft.Container(
+        #             border=ft.border.all(5,"white"),
+        #             width=200,
+        #             height=200,
+        #             visible=True
+        #         )
+        #     )
+        #     ]
+        ))
+ 
     def add_collage_area(e):
-        pass
+        new_layout_area_content.content.controls.append(
+            ft.GestureDetector(
+                drag_interval=10,
+                top=10,
+                left=10,
+                mouse_cursor=ft.MouseCursor.MOVE,
+                on_pan_update=change_position,
+                content=ft.Container(
+                    border=ft.border.all(5,"white"),
+                    width=int(new_collage_width.value) if new_collage_width.value!='' else 100,
+                    height=int(new_collage_height.value) if new_collage_height.value!='' else 100,
+                    visible=True
+                )
+            )
+        )
+        new_layout_area_content.update()
+        page.update()
     
     def save_collage_area(e):
         pass
@@ -130,7 +165,7 @@ def main(page: ft.Page):
             new_collage_tags,
             ft.FilledButton(
                 text="Save collage",
-                icon=ft.Icons.ADD_PHOTO_ALTERNATE,
+                icon=ft.Icons.SAVE_OUTLINED,
                 color=ft.Colors.WHITE,
                 bgcolor=ft.Colors.BLUE,
                 on_click=save_collage_area,
@@ -170,32 +205,9 @@ def main(page: ft.Page):
         )
         e.control.update()
 
-    ## Manage New Layout collage area
     def edit_photo(e):
         pass
 
-    def change_position(e):
-        pass
-
-    new_layout_area_content = ft.Container(
-        ft.Stack(
-        [
-            ft.GestureDetector(
-                drag_interval=10,
-                top=10,
-                left=10,
-                mouse_cursor=ft.MouseCursor.MOVE,
-                on_pan_update=change_position,
-                content=ft.Container(
-                    border=ft.border.all(5,"white"),
-                    width=200,
-                    height=200,
-                    visible=True
-                )
-            )
-            ]
-        ))
- 
     space_between_photos = 10
     layout_00_content=ft.Stack(
         [ft.Container(
@@ -313,7 +325,15 @@ def main(page: ft.Page):
             on_leave=drag_leave,
         )
 
-    # Manage PAGE
+    ## Manage New Layout collage area
+
+
+    def change_position(e:ft.DragUpdateEvent):
+        e.control.top = max(0,e.control.top + e.delta_y)
+        e.control.left = max(0,e.control.left + e.delta_x)
+        page.update()
+
+     # Manage PAGE
 
     collage_area = ft.Container(
         content=layouts_init_content,
