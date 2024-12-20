@@ -6,6 +6,7 @@ import yaml
 from PIL import ImageGrab
 from io import BytesIO
 
+
 def main(page: ft.Page):
     page.title = "Photo collage"
     page.window.width = 800
@@ -29,7 +30,7 @@ def main(page: ft.Page):
     def change_view(e):
         selected = e.control.selected_index
         if selected == 0:
-            refresh_layouts('')
+            refresh_layouts("")
             work_area.content = layouts_work_area
             collage_area.content = layouts_init_content
             collage_area.update()
@@ -117,61 +118,52 @@ def main(page: ft.Page):
 
     ## Manage layouts work area
     def load_layout(filename: str) -> ft.Stack:
-        with open(filename, 'r') as file:
+        with open(filename, "r") as file:
             data = yaml.safe_load(file)
         result = list()
-        for _, v in data['layout']['controls'].items():
+        for _, v in data["layout"]["controls"].items():
             collage_item = ft.Container()
             collage_item.content = ft.DragTarget(
-                group='photo',
+                group="photo",
                 on_will_accept=drag_will_accept,
                 on_accept=drag_accept,
                 on_leave=drag_leave,
-                content = ft.Container(
+                content=ft.Container(
                     content=ft.Image(
-                        # src=r".\assets\placeholder.png",
-                        src_base64=data['layout']['src_base64'],
-                        #src=data['layout']['src'],
+                        src_base64=data["layout"]["src_base64"],
                         fit=ft.ImageFit.FILL,
                     ),
-                    width=v['width'],
-                    height=v['height'],
+                    width=v["width"],
+                    height=v["height"],
                     border=ft.border.all(2, ft.Colors.WHITE),
-                    ),
-                )
-            collage_item.top=v['top']
-            collage_item.left=v['left']
+                ),
+            )
+            collage_item.top = v["top"]
+            collage_item.left = v["left"]
             result.append(collage_item)
         return ft.Stack(result, width=400, height=400)
 
     def refresh_layouts(_):
         layouts_work_area.controls = list()
 
-        for filename in os.listdir(r'.\assets\layouts'):
-            if filename[-4:] != '.yml':
-                continue
-            with open('.\\assets\\layouts\\' +filename, 'r') as file:
+        for filename in os.listdir(r".\assets\layouts"):
+            with open(".\\assets\\layouts\\" + filename, "r") as file:
                 data = yaml.safe_load(file)
             layouts_work_area.controls.append(
                 ft.Draggable(
                     group="layout",
                     content=ft.Image(
-                        # src='.\\assets\\layouts\\thumbnails\\'+filename[:-4]+'.png',
-                        src_base64=data['layout']['src_base64'],
+                        src_base64=data["layout"]["src_base64"],
                         width=100,
                         height=100,
                         fit=ft.ImageFit.SCALE_DOWN,
                         repeat=ft.ImageRepeat.NO_REPEAT,
                         border_radius=ft.border_radius.all(10),
                     ),
-                    data=load_layout('.\\assets\\layouts\\'+filename),
+                    data=load_layout(".\\assets\\layouts\\" + filename),
                 )
             )
-            layouts_work_area.controls.append(
-                ft.Text(filename)
-            )
-
-        # work_area.update()
+            layouts_work_area.controls.append(ft.Text(filename))
 
     layouts_work_area = ft.Column(
         controls=[],
@@ -180,8 +172,8 @@ def main(page: ft.Page):
         alignment=ft.MainAxisAlignment.START,
         scroll="always",
     )
-    # page.add(layouts_work_area)
-    refresh_layouts('')
+
+    refresh_layouts("")
 
     ## Manage Background work area
 
@@ -227,32 +219,34 @@ def main(page: ft.Page):
         page.update()
 
     def save_layout(e):
-        filename= '.\\assets\\layouts\\' + new_collage_name.value + '.yml'
+        filename = ".\\assets\\layouts\\" + new_collage_name.value + ".yml"
         data = dict()
-        data['layout']=dict()
-        data['layout']['name'] = new_collage_name.value.replace(' ','_')
-        data['layout']['tags'] = new_collage_tags.value.replace(' ','').replace(',,',',')
+        data["layout"] = dict()
+        data["layout"]["name"] = new_collage_name.value.replace(" ", "_")
+        data["layout"]["tags"] = new_collage_tags.value.replace(" ", "").replace(
+            ",,", ","
+        )
         # Define the region to capture (left, top, right, bottom)
-        bbox = (page.window.left+350,
-                page.window.top+50,
-                page.window.left + 750,
-                page.window.top+700)  
+        bbox = (
+            page.window.left + 350,
+            page.window.top + 50,
+            page.window.left + 750,
+            page.window.top + 700,
+        )
         image = ImageGrab.grab(bbox)
-        image.save('.\\assets\\layouts\\thumbnails\\' + new_collage_name.value + '.png')
         buffered = BytesIO()
         image.save(buffered, format="PNG")
         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-        data['layout']['src'] = '.\\assets\\layouts\\thumbnails\\' + new_collage_name.value + '.png'
-        data['layout']['src_base64'] = img_str
-        data['layout']['controls'] = dict()
+        data["layout"]["src_base64"] = img_str
+        data["layout"]["controls"] = dict()
         for index, c in enumerate(new_layout_area_content.content.controls):
-            data['layout']['controls'][index] = dict()
-            data['layout']['controls'][index]['top'] = c.top
-            data['layout']['controls'][index]['left'] = c.left
-            data['layout']['controls'][index]['width'] = c.content.width
-            data['layout']['controls'][index]['height'] = c.content.height
+            data["layout"]["controls"][index] = dict()
+            data["layout"]["controls"][index]["top"] = c.top
+            data["layout"]["controls"][index]["left"] = c.left
+            data["layout"]["controls"][index]["width"] = c.content.width
+            data["layout"]["controls"][index]["height"] = c.content.height
 
-        with open(filename, 'w') as file:
+        with open(filename, "w") as file:
             yaml.safe_dump(data, file)
 
     new_layout_work_content = ft.Column(
@@ -288,7 +282,7 @@ def main(page: ft.Page):
     # space_between_photos = 10
     # layout_library = [load_layout('.\\assets\\layouts\\'+f) for f in os.listdir(r'.\assets\layouts')]
     # layout_00_content = load_layout(r'.\assets\layouts\test.yml')
-    
+
     layouts_init_content = ft.DragTarget(
         group="layout",
         content=ft.Container(
