@@ -3,6 +3,9 @@ import flet as ft
 import os
 import yaml
 
+from PIL import ImageGrab
+from io import BytesIO
+
 def main(page: ft.Page):
     page.title = "Photo collage"
     page.window.width = 800
@@ -68,7 +71,6 @@ def main(page: ft.Page):
         # e.control.content.content => Image
         src = e.control.page.get_control(e.src_id)
         e.control.content.content = src.data
-        # e.control.content.content = layout_00_content
         e.control.update()
 
     def drag_leave(e):
@@ -127,8 +129,10 @@ def main(page: ft.Page):
                 on_leave=drag_leave,
                 content = ft.Container(
                     content=ft.Image(
-                        src=r".\assets\placeholder.png",
-                        fit=ft.ImageFit.NONE,
+                        # src=r".\assets\placeholder.png",
+                        src_base64=data['layout']['src_base64'],
+                        #src=data['layout']['src'],
+                        fit=ft.ImageFit.FILL,
                     ),
                     width=v['width'],
                     height=v['height'],
@@ -144,11 +148,16 @@ def main(page: ft.Page):
         layouts_work_area.controls = list()
 
         for filename in os.listdir(r'.\assets\layouts'):
+            if filename[-4:] != '.yml':
+                continue
+            with open('.\\assets\\layouts\\' +filename, 'r') as file:
+                data = yaml.safe_load(file)
             layouts_work_area.controls.append(
                 ft.Draggable(
                     group="layout",
                     content=ft.Image(
-                        src=r".\assets\layout_01_image.png",
+                        # src='.\\assets\\layouts\\thumbnails\\'+filename[:-4]+'.png',
+                        src_base64=data['layout']['src_base64'],
                         width=100,
                         height=100,
                         fit=ft.ImageFit.SCALE_DOWN,
@@ -223,7 +232,18 @@ def main(page: ft.Page):
         data['layout']=dict()
         data['layout']['name'] = new_collage_name.value.replace(' ','_')
         data['layout']['tags'] = new_collage_tags.value.replace(' ','').replace(',,',',')
-        data['layout']['src'] = 'to be done' # TODO screenshot the collage, convert to base64 and store here to be used as thumbnail
+        # Define the region to capture (left, top, right, bottom)
+        bbox = (page.window.left+350,
+                page.window.top+50,
+                page.window.left + 750,
+                page.window.top+700)  
+        image = ImageGrab.grab(bbox)
+        image.save('.\\assets\\layouts\\thumbnails\\' + new_collage_name.value + '.png')
+        buffered = BytesIO()
+        image.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+        data['layout']['src'] = '.\\assets\\layouts\\thumbnails\\' + new_collage_name.value + '.png'
+        data['layout']['src_base64'] = img_str
         data['layout']['controls'] = dict()
         for index, c in enumerate(new_layout_area_content.content.controls):
             data['layout']['controls'][index] = dict()
@@ -265,9 +285,9 @@ def main(page: ft.Page):
     def edit_photo(e):
         pass
 
-    space_between_photos = 10
-    layout_library = [load_layout('.\\assets\\layouts\\'+f) for f in os.listdir(r'.\assets\layouts')]
-    layout_00_content = load_layout(r'.\assets\layouts\test.yml')
+    # space_between_photos = 10
+    # layout_library = [load_layout('.\\assets\\layouts\\'+f) for f in os.listdir(r'.\assets\layouts')]
+    # layout_00_content = load_layout(r'.\assets\layouts\test.yml')
     
     layouts_init_content = ft.DragTarget(
         group="layout",
