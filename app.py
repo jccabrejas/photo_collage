@@ -61,6 +61,7 @@ def main(page: ft.Page):
         # e.control.content.content => Image
         src = e.control.page.get_control(e.src_id)
         e.control.content.content.src = src.content.src
+        e.control.content.content.src_base64 = None # needed because otherwise there is a clash with both src and src_base64
         e.control.content.content.offset = ft.transform.Offset(
             0, 0
         )  # TODO clean up if not required
@@ -146,7 +147,9 @@ def main(page: ft.Page):
     def refresh_layouts(_):
         layouts_work_area.controls = list()
 
-        for filename in os.listdir(r".\assets\layouts"):
+        for filename in os.listdir(r'.\assets\layouts'):
+            if filename[-4:] != ".yml":
+                continue
             with open(".\\assets\\layouts\\" + filename, "r") as file:
                 data = yaml.safe_load(file)
             layouts_work_area.controls.append(
@@ -154,6 +157,7 @@ def main(page: ft.Page):
                     group="layout",
                     content=ft.Image(
                         src_base64=data["layout"]["src_base64"],
+                        src=".\\assets\\layouts\\thumbnails\\" + filename[:-4] + ".png",
                         width=100,
                         height=100,
                         fit=ft.ImageFit.SCALE_DOWN,
@@ -221,11 +225,9 @@ def main(page: ft.Page):
     def save_layout(e):
         filename = ".\\assets\\layouts\\" + new_collage_name.value + ".yml"
         data = dict()
-        data["layout"] = dict()
-        data["layout"]["name"] = new_collage_name.value.replace(" ", "_")
-        data["layout"]["tags"] = new_collage_tags.value.replace(" ", "").replace(
-            ",,", ","
-        )
+        data['layout']=dict()
+        data['layout']['name'] = new_collage_name.value.replace(' ','_')
+        data['layout']['tags'] = new_collage_tags.value.replace(' ','').replace(',,',',')
         # Define the region to capture (left, top, right, bottom)
         bbox = (
             page.window.left + 350,
@@ -234,11 +236,14 @@ def main(page: ft.Page):
             page.window.top + 700,
         )
         image = ImageGrab.grab(bbox)
+        temp = ".\\assets\\layouts\\thumbnails\\" + new_collage_name.value.replace(' ','_') + ".png"
+        image.save(temp)
         buffered = BytesIO()
         image.save(buffered, format="PNG")
         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+        data["layout"]["src"] = temp
         data["layout"]["src_base64"] = img_str
-        data["layout"]["controls"] = dict()
+        data['layout']['controls'] = dict()
         for index, c in enumerate(new_layout_area_content.content.controls):
             data["layout"]["controls"][index] = dict()
             data["layout"]["controls"][index]["top"] = c.top
@@ -282,7 +287,7 @@ def main(page: ft.Page):
     # space_between_photos = 10
     # layout_library = [load_layout('.\\assets\\layouts\\'+f) for f in os.listdir(r'.\assets\layouts')]
     # layout_00_content = load_layout(r'.\assets\layouts\test.yml')
-
+    
     layouts_init_content = ft.DragTarget(
         group="layout",
         content=ft.Container(
