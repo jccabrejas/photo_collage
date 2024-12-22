@@ -74,10 +74,16 @@ def main(page: ft.Page):
         # e.control.content.content => Image
         src = e.control.page.get_control(e.src_id)
         e.control.content.content.src = src.content.src
-        e.control.content.content.src_base64 = None # needed because otherwise there is a clash with both src and src_base64
-        e.control.content.content.offset = ft.transform.Offset(
-            0, 0
-        )  # TODO clean up if not required
+        e.control.content.content = ft.InteractiveViewer(
+            min_scale=0.1,
+            max_scale=15,
+            boundary_margin=ft.margin.all(20),
+            on_interaction_start=lambda e: print(e),
+            on_interaction_end=lambda e: print(e),
+            on_interaction_update=lambda e: print(e),
+            content=ft.Image(src.content.src),
+            )
+        e.control.content.content.content.src_base64 = None # needed because otherwise there is a clash with both src and src_base64
         e.control.update()
 
     def drag_accept_layout(e):
@@ -135,7 +141,7 @@ def main(page: ft.Page):
     print(selected_photo)
     def edit_photo(e):
         #selected_photo = e.control.page.get_control(e.src_id)
-        my_image.content.src = e.control.content.src
+        my_image.src = e.control.content.src
         my_image.update()
         e.control.update()
         print(selected_photo)
