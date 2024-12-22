@@ -26,6 +26,19 @@ def main(page: ft.Page):
     )
     page.vertical_alignment = ft.MainAxisAlignment.START
 
+    my_image = ft.InteractiveViewer(
+            min_scale=0.1,
+            max_scale=15,
+            boundary_margin=ft.margin.all(20),
+            on_interaction_start=lambda e: print(e),
+            on_interaction_end=lambda e: print(e),
+            on_interaction_update=lambda e: print(e),
+            content=ft.Image(
+                src="https://picsum.photos/500/500",
+            )
+    )
+    my_image.visible = True
+
     # Manage RAIL area
     def change_view(e):
         selected = e.control.selected_index
@@ -118,6 +131,15 @@ def main(page: ft.Page):
     )
 
     ## Manage layouts work area
+    selected_photo = None
+    print(selected_photo)
+    def edit_photo(e):
+        #selected_photo = e.control.page.get_control(e.src_id)
+        my_image.content.src = e.control.content.src
+        my_image.update()
+        e.control.update()
+        print(selected_photo)
+
     def load_layout(filename: str) -> ft.Stack:
         with open(filename, "r") as file:
             data = yaml.safe_load(file)
@@ -137,6 +159,7 @@ def main(page: ft.Page):
                     width=v["width"],
                     height=v["height"],
                     border=ft.border.all(2, ft.Colors.WHITE),
+                    on_click=edit_photo
                 ),
             )
             collage_item.top = v["top"]
@@ -281,12 +304,8 @@ def main(page: ft.Page):
 
     ## Manage Layouts and Photos collage area
 
-    def edit_photo(e):
-        pass
 
-    # space_between_photos = 10
-    # layout_library = [load_layout('.\\assets\\layouts\\'+f) for f in os.listdir(r'.\assets\layouts')]
-    # layout_00_content = load_layout(r'.\assets\layouts\test.yml')
+
     
     layouts_init_content = ft.DragTarget(
         group="layout",
@@ -306,6 +325,7 @@ def main(page: ft.Page):
     def change_position(e: ft.DragUpdateEvent):
         e.control.top = max(0, e.control.top + e.delta_y)
         e.control.left = max(0, e.control.left + e.delta_x)
+        e.control.update()
         page.update()
 
     # Manage PAGE
@@ -370,6 +390,25 @@ def main(page: ft.Page):
         expand=False,
     )
 
+    def change_crop_position(e: ft.DragUpdateEvent):
+        e.control.top = max(0, e.control.top + e.delta_y)
+        e.control.left = max(0, e.control.left + e.delta_x)
+        page.update()
+
+    edit_photo_area = ft.GestureDetector(
+        drag_interval=10,
+        top=10,
+        left=10,
+        mouse_cursor=ft.MouseCursor.MOVE,
+        on_pan_update=change_crop_position,
+        content = ft.Container(
+            border=ft.border.all(3,"white"),
+            width=200,
+            height=200,
+            visible=True,
+        )
+    )
+
     page.add(
         ft.Row(
             [
@@ -378,6 +417,13 @@ def main(page: ft.Page):
                 work_area,
                 ft.VerticalDivider(width=5, thickness=3, color=ft.Colors.BLUE),
                 collage_area,
+                ft.Container(
+                content=ft.Stack(
+                    controls=[my_image, edit_photo_area,],
+                    ),
+                width=400,
+                height=700
+                )
             ],
             spacing=5,
             expand=False,
