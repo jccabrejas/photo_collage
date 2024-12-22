@@ -26,19 +26,6 @@ def main(page: ft.Page):
     )
     page.vertical_alignment = ft.MainAxisAlignment.START
 
-    my_image = ft.InteractiveViewer(
-            min_scale=0.1,
-            max_scale=15,
-            boundary_margin=ft.margin.all(20),
-            on_interaction_start=lambda e: print(e),
-            on_interaction_end=lambda e: print(e),
-            on_interaction_update=lambda e: print(e),
-            content=ft.Image(
-                src="https://picsum.photos/500/500",
-            )
-    )
-    my_image.visible = True
-
     # Manage RAIL area
     def change_view(e):
         selected = e.control.selected_index
@@ -77,13 +64,14 @@ def main(page: ft.Page):
         e.control.content.content = ft.InteractiveViewer(
             min_scale=0.1,
             max_scale=15,
+            scale_factor=500,
             boundary_margin=ft.margin.all(20),
             on_interaction_start=lambda e: print(e),
             on_interaction_end=lambda e: print(e),
             on_interaction_update=lambda e: print(e),
             content=ft.Image(src.content.src),
-            )
-        e.control.content.content.content.src_base64 = None # needed because otherwise there is a clash with both src and src_base64
+        )
+        e.control.content.content.content.src_base64 = None  # needed because otherwise there is a clash with both src and src_base64
         e.control.update()
 
     def drag_accept_layout(e):
@@ -137,14 +125,6 @@ def main(page: ft.Page):
     )
 
     ## Manage layouts work area
-    selected_photo = None
-    print(selected_photo)
-    def edit_photo(e):
-        #selected_photo = e.control.page.get_control(e.src_id)
-        my_image.src = e.control.content.src
-        my_image.update()
-        e.control.update()
-        print(selected_photo)
 
     def load_layout(filename: str) -> ft.Stack:
         with open(filename, "r") as file:
@@ -165,7 +145,6 @@ def main(page: ft.Page):
                     width=v["width"],
                     height=v["height"],
                     border=ft.border.all(2, ft.Colors.WHITE),
-                    on_click=edit_photo
                 ),
             )
             collage_item.top = v["top"]
@@ -176,7 +155,7 @@ def main(page: ft.Page):
     def refresh_layouts(_):
         layouts_work_area.controls = list()
 
-        for filename in os.listdir(r'.\assets\layouts'):
+        for filename in os.listdir(r".\assets\layouts"):
             if filename[-4:] != ".yml":
                 continue
             with open(".\\assets\\layouts\\" + filename, "r") as file:
@@ -254,9 +233,11 @@ def main(page: ft.Page):
     def save_layout(e):
         filename = ".\\assets\\layouts\\" + new_collage_name.value + ".yml"
         data = dict()
-        data['layout']=dict()
-        data['layout']['name'] = new_collage_name.value.replace(' ','_')
-        data['layout']['tags'] = new_collage_tags.value.replace(' ','').replace(',,',',')
+        data["layout"] = dict()
+        data["layout"]["name"] = new_collage_name.value.replace(" ", "_")
+        data["layout"]["tags"] = new_collage_tags.value.replace(" ", "").replace(
+            ",,", ","
+        )
         # Define the region to capture (left, top, right, bottom)
         bbox = (
             page.window.left + 350,
@@ -265,14 +246,18 @@ def main(page: ft.Page):
             page.window.top + 700,
         )
         image = ImageGrab.grab(bbox)
-        temp = ".\\assets\\layouts\\thumbnails\\" + new_collage_name.value.replace(' ','_') + ".png"
+        temp = (
+            ".\\assets\\layouts\\thumbnails\\"
+            + new_collage_name.value.replace(" ", "_")
+            + ".png"
+        )
         image.save(temp)
         buffered = BytesIO()
         image.save(buffered, format="PNG")
         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
         data["layout"]["src"] = temp
         data["layout"]["src_base64"] = img_str
-        data['layout']['controls'] = dict()
+        data["layout"]["controls"] = dict()
         for index, c in enumerate(new_layout_area_content.content.controls):
             data["layout"]["controls"][index] = dict()
             data["layout"]["controls"][index]["top"] = c.top
@@ -310,9 +295,6 @@ def main(page: ft.Page):
 
     ## Manage Layouts and Photos collage area
 
-
-
-    
     layouts_init_content = ft.DragTarget(
         group="layout",
         content=ft.Container(
@@ -340,7 +322,7 @@ def main(page: ft.Page):
         content=layouts_init_content,
         expand=False,
         padding=30,
-        width=400,
+        width=page.window.height,
         height=page.window.height,
         bgcolor=ft.Colors.GREY_500,
         border=ft.border.all(2, ft.Colors.BLACK),
@@ -396,25 +378,6 @@ def main(page: ft.Page):
         expand=False,
     )
 
-    def change_crop_position(e: ft.DragUpdateEvent):
-        e.control.top = max(0, e.control.top + e.delta_y)
-        e.control.left = max(0, e.control.left + e.delta_x)
-        page.update()
-
-    edit_photo_area = ft.GestureDetector(
-        drag_interval=10,
-        top=10,
-        left=10,
-        mouse_cursor=ft.MouseCursor.MOVE,
-        on_pan_update=change_crop_position,
-        content = ft.Container(
-            border=ft.border.all(3,"white"),
-            width=200,
-            height=200,
-            visible=True,
-        )
-    )
-
     page.add(
         ft.Row(
             [
@@ -423,13 +386,6 @@ def main(page: ft.Page):
                 work_area,
                 ft.VerticalDivider(width=5, thickness=3, color=ft.Colors.BLUE),
                 collage_area,
-                ft.Container(
-                content=ft.Stack(
-                    controls=[my_image, edit_photo_area,],
-                    ),
-                width=400,
-                height=700
-                )
             ],
             spacing=5,
             expand=False,
