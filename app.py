@@ -5,7 +5,7 @@ import yaml
 
 from PIL import ImageGrab
 from io import BytesIO
-from time import gmtime, strftime
+from time import localtime, strftime
 
 
 def main(page: ft.Page):
@@ -216,23 +216,60 @@ def main(page: ft.Page):
     )
 
     ## Manage Save Collage work area
+    # collage_details = dict()
+    # collage_details['width']
+    # collage_details['height']
+    # collage_details['bgcolor']
+    # collage_details['items'] = list()
+    # collage_details['items'][0] = dict()
+    # collage_details['items'][0]['uid']
+    # collage_details['items'][0]['src']
+    # collage_details['items'][0]['top']
+    # collage_details['items'][0]['left']
+    
+
     def save_collage(e):
-        pass
+        # Define the region to capture (left, top, right, bottom)
+        bbox = (
+            page.window.left + 350,
+            page.window.top + 50,
+            page.window.left + 750,
+            page.window.top + 700,
+        )
+        image = ImageGrab.grab(bbox)
+        temp = (
+            ".\\output\\"
+            + save_photo_filename_text.value.replace(" ", "_")
+            + photo_extension_dropdown.value
+        )
+        image.save(temp)
+        # print(e)
+        # collage_area_to_be_saved = e.page.controls[0].controls[-1].content.content
+        # collage_area_to_be_saved.width
+        # collage_area_to_be_saved.height
+        # collage_area_to_be_saved.bgcolor
+
+        # for collage_item in collage_area_to_be_saved.content.controls:
+        #     collage_item.top
+        #     collage_item.left
+        #     photo = collage_item.content.content.content.content
+        #     print(photo.src)
+        # pass
 
     save_photo_filename_text = ft.TextField(
         label="File name",
-        value="collage_" + strftime("%Y-%m-%d_%H%M%S", gmtime()),
+        value="collage_" + strftime("%Y-%m-%d_%H%M%S", localtime()),
         prefix_icon=ft.Icons.DRIVE_FILE_MOVE,
         )
 
     photo_extension_dropdown = ft.Dropdown(
         width=200,
         options=[
-            ft.dropdown.Option("PNG"),
-            ft.dropdown.Option("JPG"),
-            ft.dropdown.Option("WebP"),
+            ft.dropdown.Option(".PNG"),
+            ft.dropdown.Option(".JPG"),
+            ft.dropdown.Option(".WebP"),
         ],
-        value="PNG",
+        value=".PNG",
     )
     save_photo_work_area = ft.Column(
         controls=[
