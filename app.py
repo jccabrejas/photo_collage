@@ -10,8 +10,8 @@ from time import localtime, strftime, sleep
 
 def main(page: ft.Page):
     page.title = "Photo collage"
-    page.window.width = 800
-    page.window.height = 800
+    page.window.width = 1400
+    page.window.height = 1100
     page.padding = 0
     page.bgcolor = ft.Colors.GREY_600
     page.theme_mode = ft.ThemeMode.DARK
@@ -67,9 +67,6 @@ def main(page: ft.Page):
             max_scale=15,
             scale_factor=500,
             boundary_margin=ft.margin.all(20),
-            on_interaction_start=lambda e: print(e),
-            on_interaction_end=lambda e: print(e),
-            on_interaction_update=lambda e: print(e),
             content=ft.Image(src.content.src),
         )
         e.control.content.content.content.src_base64 = None  # needed because otherwise there is a clash with both src and src_base64
@@ -192,9 +189,9 @@ def main(page: ft.Page):
 
     def apply_color(e):
         if background_color_text.value.lower() in ft.Colors:
-            layouts_init_content.content.bgcolor=background_color_text.value
+            layouts_init_content.content.bgcolor = background_color_text.value
         else:
-            layouts_init_content.content.bgcolor=ft.Colors.WHITE
+            layouts_init_content.content.bgcolor = ft.Colors.WHITE
         layouts_init_content.update()
 
     background_color_text = ft.TextField(label="Color", prefix_icon=ft.Icons.COLOR_LENS)
@@ -216,6 +213,8 @@ def main(page: ft.Page):
     )
 
     ## Manage Save Collage work area
+    # TODO save image based on states, instead of using ImageGrab
+
     # collage_details = dict()
     # collage_details['width']
     # collage_details['height']
@@ -226,23 +225,25 @@ def main(page: ft.Page):
     # collage_details['items'][0]['src']
     # collage_details['items'][0]['top']
     # collage_details['items'][0]['left']
-    
 
     def save_collage(e):
         new_color = e.page.controls[0].controls[-1].content.content.bgcolor
-        e.page.controls[0].controls[-1].content.content.border = ft.border.all(1, new_color)
+        e.page.controls[0].controls[-1].content.content.border = ft.border.all(
+            1, new_color
+        )
 
-        for collage_item in e.page.controls[0].controls[-1].content.content.content.controls:
-            collage_item.border = ft.border.all(1, new_color)
-            collage_item.update()
+        for collage_item in (
+            e.page.controls[0].controls[-1].content.content.content.controls
+        ):
             photo = collage_item.content.content
             photo.border = ft.border.all(1, new_color)
             photo.update()
-        
+
         e.page.controls[0].controls[-1].content.content.update()
-        sleep(0.2) # seconds
-        
+        sleep(0.2)  # seconds
+
         # Define the region to capture (left, top, right, bottom)
+        # TODO define this dynamically
         bbox = (
             page.window.left + 375,
             page.window.top + 63,
@@ -257,12 +258,11 @@ def main(page: ft.Page):
         )
         image.save(temp)
 
-
     save_photo_filename_text = ft.TextField(
         label="File name",
         value="collage_" + strftime("%Y-%m-%d_%H%M%S", localtime()),
         prefix_icon=ft.Icons.DRIVE_FILE_MOVE,
-        )
+    )
 
     photo_extension_dropdown = ft.Dropdown(
         width=200,
@@ -393,8 +393,6 @@ def main(page: ft.Page):
 
     # Manage COLLAGE area
 
-    ## Manage Layouts and Photos collage area
-
     layouts_init_content = ft.DragTarget(
         group="layout",
         content=ft.Container(
@@ -408,8 +406,6 @@ def main(page: ft.Page):
         on_leave=drag_leave,
     )
 
-    ## Manage New Layout collage area
-
     def change_position(e: ft.DragUpdateEvent):
         e.control.top = max(0, e.control.top + e.delta_y)
         e.control.left = max(0, e.control.left + e.delta_x)
@@ -422,8 +418,8 @@ def main(page: ft.Page):
         content=layouts_init_content,
         expand=False,
         padding=30,
-        width=page.window.height,
-        height=page.window.height,
+        width=page.window.width-350,
+        height=page.window.height-200,
         bgcolor=ft.Colors.GREY_500,
         border=ft.border.all(2, ft.Colors.BLACK),
     )
