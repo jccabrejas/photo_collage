@@ -5,7 +5,7 @@ import yaml
 
 from PIL import ImageGrab
 from io import BytesIO
-from time import localtime, strftime
+from time import localtime, strftime, sleep
 
 
 def main(page: ft.Page):
@@ -229,12 +229,25 @@ def main(page: ft.Page):
     
 
     def save_collage(e):
+        collage_area_to_be_saved = e.page.controls[0].controls[-1].content.content
+        e.page.controls[0].controls[-1].content.content.border = ft.border.all(1, collage_area_to_be_saved.bgcolor)
+
+        for collage_item in e.page.controls[0].controls[-1].content.content.content.controls:
+            collage_item.border = ft.border.all(1, collage_area_to_be_saved.bgcolor)
+            photo = collage_item.content.content
+            photo.border = ft.border.all(1, collage_area_to_be_saved.bgcolor)
+            collage_item.update()
+            photo.update()
+        
+            e.page.controls[0].controls[-1].content.content.update()
+        sleep(0.2) # seconds
+        
         # Define the region to capture (left, top, right, bottom)
         bbox = (
-            page.window.left + 350,
-            page.window.top + 50,
-            page.window.left + 750,
-            page.window.top + 700,
+            page.window.left + 375,
+            page.window.top + 63,
+            page.window.left + 1075,
+            page.window.top + 795,
         )
         image = ImageGrab.grab(bbox)
         temp = (
@@ -243,18 +256,7 @@ def main(page: ft.Page):
             + photo_extension_dropdown.value
         )
         image.save(temp)
-        # print(e)
-        # collage_area_to_be_saved = e.page.controls[0].controls[-1].content.content
-        # collage_area_to_be_saved.width
-        # collage_area_to_be_saved.height
-        # collage_area_to_be_saved.bgcolor
 
-        # for collage_item in collage_area_to_be_saved.content.controls:
-        #     collage_item.top
-        #     collage_item.left
-        #     photo = collage_item.content.content.content.content
-        #     print(photo.src)
-        # pass
 
     save_photo_filename_text = ft.TextField(
         label="File name",
