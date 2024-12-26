@@ -229,17 +229,17 @@ def main(page: ft.Page):
     
 
     def save_collage(e):
-        collage_area_to_be_saved = e.page.controls[0].controls[-1].content.content
-        e.page.controls[0].controls[-1].content.content.border = ft.border.all(1, collage_area_to_be_saved.bgcolor)
+        new_color = e.page.controls[0].controls[-1].content.content.bgcolor
+        e.page.controls[0].controls[-1].content.content.border = ft.border.all(1, new_color)
 
         for collage_item in e.page.controls[0].controls[-1].content.content.content.controls:
-            collage_item.border = ft.border.all(1, collage_area_to_be_saved.bgcolor)
-            photo = collage_item.content.content
-            photo.border = ft.border.all(1, collage_area_to_be_saved.bgcolor)
+            collage_item.border = ft.border.all(1, new_color)
             collage_item.update()
+            photo = collage_item.content.content
+            photo.border = ft.border.all(1, new_color)
             photo.update()
         
-            e.page.controls[0].controls[-1].content.content.update()
+        e.page.controls[0].controls[-1].content.content.update()
         sleep(0.2) # seconds
         
         # Define the region to capture (left, top, right, bottom)
