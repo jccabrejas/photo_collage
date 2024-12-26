@@ -37,7 +37,7 @@ def main(page: ft.Page):
         elif selected == 1:
             work_area.content = photos_work_area
         elif selected == 2:
-            work_area.content = ft.Text("Background", size=24)
+            work_area.content = background_work_area
         elif selected == 3:
             work_area.content = ft.Text("Save collage", size=24)
         elif selected == 4:
@@ -188,6 +188,31 @@ def main(page: ft.Page):
     refresh_layouts("")
 
     ## Manage Background work area
+
+    def apply_color(e):
+        if background_color_text.value.lower() in ft.Colors:
+            layouts_init_content.content.bgcolor=background_color_text.value
+        else:
+            layouts_init_content.content.bgcolor=ft.Colors.WHITE
+        layouts_init_content.update()
+
+    background_color_text = ft.TextField(label="Color", prefix_icon=ft.Icons.COLOR_LENS)
+    background_work_area = ft.Column(
+        controls=[
+            background_color_text,
+            ft.FilledButton(
+                text="Apply color",
+                icon=ft.Icons.SAVE_OUTLINED,
+                color=ft.Colors.WHITE,
+                bgcolor=ft.Colors.BLUE,
+                on_click=apply_color,
+            ),
+        ],
+        width=300,
+        expand=False,
+        alignment=ft.MainAxisAlignment.START,
+        scroll="always",
+    )
 
     ## Manage Save Collage work area
 
