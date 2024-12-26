@@ -5,6 +5,7 @@ import yaml
 
 from PIL import ImageGrab
 from io import BytesIO
+from time import gmtime, strftime
 
 
 def main(page: ft.Page):
@@ -39,7 +40,7 @@ def main(page: ft.Page):
         elif selected == 2:
             work_area.content = background_work_area
         elif selected == 3:
-            work_area.content = ft.Text("Save collage", size=24)
+            work_area.content = save_photo_work_area
         elif selected == 4:
             work_area.content = new_layout_work_content
             collage_area.content = new_layout_area_content
@@ -215,6 +216,41 @@ def main(page: ft.Page):
     )
 
     ## Manage Save Collage work area
+    def save_collage(e):
+        pass
+
+    save_photo_filename_text = ft.TextField(
+        label="File name",
+        value="collage_" + strftime("%Y-%m-%d_%H%M%S", gmtime()),
+        prefix_icon=ft.Icons.DRIVE_FILE_MOVE,
+        )
+
+    photo_extension_dropdown = ft.Dropdown(
+        width=200,
+        options=[
+            ft.dropdown.Option("PNG"),
+            ft.dropdown.Option("JPG"),
+            ft.dropdown.Option("WebP"),
+        ],
+        value="PNG",
+    )
+    save_photo_work_area = ft.Column(
+        controls=[
+            save_photo_filename_text,
+            photo_extension_dropdown,
+            ft.FilledButton(
+                text="Save collage",
+                icon=ft.Icons.SAVE_OUTLINED,
+                color=ft.Colors.WHITE,
+                bgcolor=ft.Colors.BLUE,
+                on_click=save_collage,
+            ),
+        ],
+        width=300,
+        expand=False,
+        alignment=ft.MainAxisAlignment.START,
+        scroll="always",
+    )
 
     ## Manage New Layout work area
     new_collage_width = ft.TextField(
