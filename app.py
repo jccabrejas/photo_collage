@@ -10,7 +10,7 @@ from time import localtime, strftime, sleep
 
 def main(page: ft.Page):
     page.title = "Photo collage"
-    page.window.width = 1400
+    page.window.width = 50 + 350 + 1000
     page.window.height = 1100
     page.padding = 0
     page.bgcolor = ft.Colors.GREY_600
@@ -303,10 +303,13 @@ def main(page: ft.Page):
     grid_spacing = ft.TextField(
         value=10, label="Grid Space", prefix_icon=ft.Icons.GRID_ON
     )
-
+    selected_top = ft.Text()
+    selected_left = ft.Text()
+    selected_width = ft.Text()
+    selected_height = ft.Text()
 
     def make_not_visible(e):
-        e.control.visible=False
+        e.control.visible = False
         e.control.update()
 
     new_layout_area_content = ft.Container(ft.Stack())
@@ -400,6 +403,10 @@ def main(page: ft.Page):
                 bgcolor=ft.Colors.BLUE,
                 on_click=save_layout,
             ),
+            ft.Row(controls=[ft.Text("Top: "), selected_top]),
+            ft.Row(controls=[ft.Text("Left: "), selected_left]),
+            ft.Row(controls=[ft.Text("Width: "), selected_width]),
+            ft.Row(controls=[ft.Text("Height: "), selected_height]),
         ]
     )
 
@@ -420,25 +427,31 @@ def main(page: ft.Page):
 
     def change_position(e: ft.DragUpdateEvent):
         if abs(e.control.content.width - e.local_x) < 10:
-            print(e.control.content.width, e.local_x)
-            e.control.content.width += e.delta_x
-            e.control.content.update()
+            e.control.content.width = max(0, e.local_x)
         elif abs(e.control.content.height - e.local_y) < 10:
-            print(e.control.content.height, e.local_y)
-            e.control.content.height += e.delta_y
-            e.control.content.update()
+            e.control.content.height = max(0, e.local_y)
         else:
             e.control.top = max(0, e.control.top + e.delta_y)
             e.control.left = max(0, e.control.left + e.delta_x)
+        print(e.control.content.width, e.control.content.height)
+        selected_top.value = e.control.top
+        selected_left.value = e.control.left
+        selected_width.value = e.control.content.width
+        selected_height.value = e.control.content.height
+        e.control.content.update()
         e.control.update()
         page.update()
 
     def adjust_to_grid(e: ft.DragEndEvent):
         grid_space = int(grid_spacing.value)
-        remainder_top = (e.control.top ) % grid_space
-        remainder_left = (e.control.left ) % grid_space
+        remainder_top = (e.control.top) % grid_space
+        remainder_left = (e.control.left) % grid_space
         e.control.top = max(0, e.control.top - remainder_top)
         e.control.left = max(0, e.control.left - remainder_left)
+        selected_top.value = e.control.top
+        selected_left.value = e.control.left
+        selected_width.value = e.control.content.width
+        selected_height.value = e.control.content.height
         e.control.update()
         page.update()
 
@@ -448,8 +461,8 @@ def main(page: ft.Page):
         content=layouts_init_content,
         expand=False,
         padding=30,
-        width=page.window.width-350,
-        height=page.window.height-200,
+        width=page.window.width - 350,
+        height=page.window.height - 200,
         bgcolor=ft.Colors.GREY_500,
         border=ft.border.all(2, ft.Colors.BLACK),
     )
