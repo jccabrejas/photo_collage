@@ -300,6 +300,10 @@ def main(page: ft.Page):
         label="Name", prefix_icon=ft.Icons.DRIVE_FILE_RENAME_OUTLINE_SHARP
     )
     new_collage_tags = ft.TextField(label="Tags (comma sep)", prefix_icon=ft.Icons.TAG)
+    grid_spacing = ft.TextField(
+        label="Grid Space", prefix_icon=ft.Icons.GRID_ON
+    )
+
 
     new_layout_area_content = ft.Container(ft.Stack())
 
@@ -311,6 +315,7 @@ def main(page: ft.Page):
                 left=10,
                 mouse_cursor=ft.MouseCursor.MOVE,
                 on_pan_update=change_position,
+                on_pan_end=adjust_to_grid,
                 content=ft.Container(
                     border=ft.border.all(5, "white"),
                     width=(
@@ -381,6 +386,7 @@ def main(page: ft.Page):
             ),
             new_collage_name,
             new_collage_tags,
+            grid_spacing,
             ft.FilledButton(
                 text="Save layout",
                 icon=ft.Icons.SAVE_OUTLINED,
@@ -409,6 +415,16 @@ def main(page: ft.Page):
     def change_position(e: ft.DragUpdateEvent):
         e.control.top = max(0, e.control.top + e.delta_y)
         e.control.left = max(0, e.control.left + e.delta_x)
+        e.control.update()
+        page.update()
+
+    def adjust_to_grid(e: ft.DragEndEvent):
+        grid_space = int(grid_spacing.value)
+        print(e.control.left)
+        remainder_top = (e.control.top ) % grid_space
+        remainder_left = (e.control.left ) % grid_space
+        e.control.top = max(0, e.control.top - remainder_top)
+        e.control.left = max(0, e.control.left - remainder_left)
         e.control.update()
         page.update()
 
