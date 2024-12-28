@@ -301,9 +301,13 @@ def main(page: ft.Page):
     )
     new_collage_tags = ft.TextField(label="Tags (comma sep)", prefix_icon=ft.Icons.TAG)
     grid_spacing = ft.TextField(
-        label="Grid Space", prefix_icon=ft.Icons.GRID_ON
+        value=10, label="Grid Space", prefix_icon=ft.Icons.GRID_ON
     )
 
+
+    def make_not_visible(e):
+        e.control.visible=False
+        e.control.update()
 
     new_layout_area_content = ft.Container(ft.Stack())
 
@@ -316,6 +320,7 @@ def main(page: ft.Page):
                 mouse_cursor=ft.MouseCursor.MOVE,
                 on_pan_update=change_position,
                 on_pan_end=adjust_to_grid,
+                on_secondary_tap=make_not_visible,
                 content=ft.Container(
                     border=ft.border.all(5, "white"),
                     width=(
@@ -364,11 +369,12 @@ def main(page: ft.Page):
         data["layout"]["src_base64"] = img_str
         data["layout"]["controls"] = dict()
         for index, c in enumerate(new_layout_area_content.content.controls):
-            data["layout"]["controls"][index] = dict()
-            data["layout"]["controls"][index]["top"] = c.top
-            data["layout"]["controls"][index]["left"] = c.left
-            data["layout"]["controls"][index]["width"] = c.content.width
-            data["layout"]["controls"][index]["height"] = c.content.height
+            if c.visible:
+                data["layout"]["controls"][index] = dict()
+                data["layout"]["controls"][index]["top"] = c.top
+                data["layout"]["controls"][index]["left"] = c.left
+                data["layout"]["controls"][index]["width"] = c.content.width
+                data["layout"]["controls"][index]["height"] = c.content.height
 
         with open(filename, "w") as file:
             yaml.safe_dump(data, file)
@@ -413,14 +419,22 @@ def main(page: ft.Page):
     )
 
     def change_position(e: ft.DragUpdateEvent):
-        e.control.top = max(0, e.control.top + e.delta_y)
-        e.control.left = max(0, e.control.left + e.delta_x)
+        if abs(e.control.content.width - e.local_x) < 10:
+            print(e.control.content.width, e.local_x)
+            e.control.content.width += e.delta_x
+            e.control.content.update()
+        elif abs(e.control.content.height - e.local_y) < 10:
+            print(e.control.content.height, e.local_y)
+            e.control.content.height += e.delta_y
+            e.control.content.update()
+        else:
+            e.control.top = max(0, e.control.top + e.delta_y)
+            e.control.left = max(0, e.control.left + e.delta_x)
         e.control.update()
         page.update()
 
     def adjust_to_grid(e: ft.DragEndEvent):
         grid_space = int(grid_spacing.value)
-        print(e.control.left)
         remainder_top = (e.control.top ) % grid_space
         remainder_left = (e.control.left ) % grid_space
         e.control.top = max(0, e.control.top - remainder_top)
