@@ -148,32 +148,71 @@ def main(page: ft.Page):
             collage_item.top = v["top"]
             collage_item.left = v["left"]
             result.append(collage_item)
-        return ft.Stack(result, width=400, height=400)
+        return ft.Stack(result, width=400, height=400)  # TODO look at sizes
 
     def refresh_layouts(_):
         layouts_work_area.controls = list()
+        layouts_work_area.controls.append(layout_filter_dropdown)
+        filter_selection = {
+            "All": 0,
+            "2 Photos": 2,
+            "3 Photos": 3,
+            "4 Photos": 4,
+            ">4 Photos": 5,
+        }
+        filter_value = filter_selection[layout_filter_dropdown.value]
 
         for filename in os.listdir(r".\assets\layouts"):
             if filename[-4:] != ".yml":
                 continue
             with open(".\\assets\\layouts\\" + filename, "r") as file:
                 data = yaml.safe_load(file)
-            layouts_work_area.controls.append(
-                ft.Draggable(
-                    group="layout",
-                    content=ft.Image(
-                        src_base64=data["layout"]["src_base64"],
-                        src=".\\assets\\layouts\\thumbnails\\" + filename[:-4] + ".png",
-                        width=100,
-                        height=100,
-                        fit=ft.ImageFit.SCALE_DOWN,
-                        repeat=ft.ImageRepeat.NO_REPEAT,
-                        border_radius=ft.border_radius.all(10),
-                    ),
-                    data=load_layout(".\\assets\\layouts\\" + filename),
-                )
+            temp = ft.Draggable(
+                group="layout",
+                content=ft.Image(
+                    src_base64=data["layout"]["src_base64"],
+                    src=".\\assets\\layouts\\thumbnails\\" + filename[:-4] + ".png",
+                    width=100,
+                    height=100,
+                    fit=ft.ImageFit.FILL,
+                    repeat=ft.ImageRepeat.NO_REPEAT,
+                    border_radius=ft.border_radius.all(10),
+                ),
+                data=load_layout(".\\assets\\layouts\\" + filename),
             )
-            layouts_work_area.controls.append(ft.Text(filename))
+
+            if layout_filter_dropdown.value == "All":
+                layouts_work_area.controls.append(temp)
+                layouts_work_area.controls.append(ft.Text(filename))
+            elif layout_filter_dropdown.value == ">4 Photos":
+                if len(data["layout"]["controls"].keys()) > 4:
+                    layouts_work_area.controls.append(temp)
+                    layouts_work_area.controls.append(ft.Text(filename))
+            else:
+                if len(data["layout"]["controls"].keys()) == filter_value:
+                    layouts_work_area.controls.append(temp)
+                    layouts_work_area.controls.append(ft.Text(filename))
+
+
+    def helper_refresh():
+        refresh_layouts("")
+        work_area.content = layouts_work_area
+        work_area.update()
+        collage_area.content = layouts_init_content
+        collage_area.update()
+
+    layout_filter_dropdown = ft.Dropdown(
+        width=200,
+        options=[
+            ft.dropdown.Option("2 Photos"),
+            ft.dropdown.Option("3 Photos"),
+            ft.dropdown.Option("4 Photos"),
+            ft.dropdown.Option(">4 Photos"),
+        ],
+        value="2 Photos",
+        # on_change=lambda e: refresh_layouts("") ,
+        on_change=lambda _: helper_refresh(),
+    )
 
     layouts_work_area = ft.Column(
         controls=[],
