@@ -10,7 +10,7 @@ from time import localtime, strftime, sleep
 
 def main(page: ft.Page):
     page.title = "Photo collage"
-    page.window.width = 50 + 350 + 1000
+    page.window.width = 50 + 350 + 1400
     page.window.height = 1100
     page.padding = 0
     page.bgcolor = ft.Colors.GREY_600
@@ -128,6 +128,8 @@ def main(page: ft.Page):
         with open(filename, "r") as file:
             data = yaml.safe_load(file)
         result = list()
+        min_top, max_top, min_left, max_left = 0, 0, 0, 0
+
         for _, v in data["layout"]["controls"].items():
             collage_item = ft.Container()
             collage_item.content = ft.DragTarget(
@@ -138,17 +140,23 @@ def main(page: ft.Page):
                 content=ft.Container(
                     content=ft.Image(
                         src_base64=data["layout"]["src_base64"],
-                        fit=ft.ImageFit.FILL,
+                        fit=ft.ImageFit.CONTAIN,
                     ),
                     width=v["width"],
                     height=v["height"],
-                    border=ft.border.all(2, ft.Colors.WHITE),
+                    border=ft.border.all(2, ft.Colors.BLUE),
                 ),
             )
             collage_item.top = v["top"]
             collage_item.left = v["left"]
+            page.update()
             result.append(collage_item)
-        return ft.Stack(result, width=400, height=400)  # TODO look at sizes
+            min_top = min(min_top, collage_item.top)
+            max_top = max(max_top, collage_item.content.content.height)
+            min_left = min(min_left, collage_item.left)
+            max_left = max(max_left, collage_item.content.content.width)
+
+        return ft.Stack(result, width=max_left - min_left + 0, height=max_top - min_top + 0) 
 
     def refresh_layouts(_):
         layouts_work_area.controls = list()
@@ -174,7 +182,7 @@ def main(page: ft.Page):
                     src=".\\assets\\layouts\\thumbnails\\" + filename[:-4] + ".png",
                     width=100,
                     height=100,
-                    fit=ft.ImageFit.FILL,
+                    fit=ft.ImageFit.CONTAIN,
                     repeat=ft.ImageRepeat.NO_REPEAT,
                     border_radius=ft.border_radius.all(10),
                 ),
@@ -184,7 +192,7 @@ def main(page: ft.Page):
             if layout_filter_dropdown.value == "All":
                 layouts_work_area.controls.append(temp)
                 layouts_work_area.controls.append(ft.Text(filename))
-            elif layout_filter_dropdown.value == ">4 Photos":
+            elif layout_filter_dropdown.value == "> Photos":
                 if len(data["layout"]["controls"].keys()) > 4:
                     layouts_work_area.controls.append(temp)
                     layouts_work_area.controls.append(ft.Text(filename))
@@ -204,20 +212,20 @@ def main(page: ft.Page):
     layout_filter_dropdown = ft.Dropdown(
         width=200,
         options=[
+            ft.dropdown.Option("All"),
             ft.dropdown.Option("2 Photos"),
             ft.dropdown.Option("3 Photos"),
             ft.dropdown.Option("4 Photos"),
-            ft.dropdown.Option(">4 Photos"),
+            ft.dropdown.Option("> Photos"),
         ],
-        value="2 Photos",
-        # on_change=lambda e: refresh_layouts("") ,
+        value="All",
         on_change=lambda _: helper_refresh(),
     )
 
     layouts_work_area = ft.Column(
         controls=[],
         width=300,
-        expand=False,
+        expand=True,
         alignment=ft.MainAxisAlignment.START,
         scroll="always",
     )
@@ -270,6 +278,7 @@ def main(page: ft.Page):
         e.page.controls[0].controls[-1].content.content.border = ft.border.all(
             1, new_color
         )
+        min_top, max_top, min_left, max_left = 0, 0, 0, 0
 
         for collage_item in (
             e.page.controls[0].controls[-1].content.content.content.controls
@@ -278,17 +287,23 @@ def main(page: ft.Page):
             photo.border = ft.border.all(1, new_color)
             photo.update()
 
+            min_top = min(min_top, collage_item.top)
+            max_top = max(max_top, collage_item.top + collage_item.content.content.height)
+            min_left = min(min_left, collage_item.left)
+            max_left = max(max_left, collage_item.left + collage_item.content.content.width)
+
         e.page.controls[0].controls[-1].content.content.update()
         sleep(0.2)  # seconds
 
         # Define the region to capture (left, top, right, bottom)
         # TODO define this dynamically
         bbox = (
-            page.window.left + 375,
-            page.window.top + 63,
-            page.window.left + 1075,
-            page.window.top + 795,
+            page.window.left + 360 + min_left,
+            page.window.top + 150 + min_top,
+            page.window.left + 380 + max_left,
+            page.window.top + 170 + max_top,
         )
+
         image = ImageGrab.grab(bbox)
         temp = (
             ".\\output\\"
@@ -390,13 +405,30 @@ def main(page: ft.Page):
         data["layout"]["tags"] = new_collage_tags.value.replace(" ", "").replace(
             ",,", ","
         )
+
+        data["layout"]["controls"] = dict()
+        min_top, max_top, min_left, max_left = 0, 0, 0, 0
+        for index, c in enumerate(new_layout_area_content.content.controls):
+            if c.visible:
+                data["layout"]["controls"][index] = dict()
+                data["layout"]["controls"][index]["top"] = c.top
+                data["layout"]["controls"][index]["left"] = c.left
+                data["layout"]["controls"][index]["width"] = c.content.width
+                data["layout"]["controls"][index]["height"] = c.content.height
+
+            min_top = min(min_top, c.top)
+            max_top = max(max_top, c.top + c.content.height)
+            min_left = min(min_left, c.left)
+            max_left = max(max_left, c.left + c.content.width)
+
         # Define the region to capture (left, top, right, bottom)
         bbox = (
-            page.window.left + 350,
-            page.window.top + 50,
-            page.window.left + 750,
-            page.window.top + 700,
+            page.window.left + 360 + min_left,
+            page.window.top + 150 + min_top,
+            page.window.left + 380 + max_left,
+            page.window.top + 170 + max_top,
         )
+
         image = ImageGrab.grab(bbox)
         temp = (
             ".\\assets\\layouts\\thumbnails\\"
@@ -409,15 +441,6 @@ def main(page: ft.Page):
         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
         data["layout"]["src"] = temp
         data["layout"]["src_base64"] = img_str
-        data["layout"]["controls"] = dict()
-        for index, c in enumerate(new_layout_area_content.content.controls):
-            if c.visible:
-                data["layout"]["controls"][index] = dict()
-                data["layout"]["controls"][index]["top"] = c.top
-                data["layout"]["controls"][index]["left"] = c.left
-                data["layout"]["controls"][index]["width"] = c.content.width
-                data["layout"]["controls"][index]["height"] = c.content.height
-
         with open(filename, "w") as file:
             yaml.safe_dump(data, file)
 
@@ -455,8 +478,9 @@ def main(page: ft.Page):
         group="layout",
         content=ft.Container(
             bgcolor=ft.Colors.WHITE,
-            width=400,
-            height=400,
+            width=page.window.width - 350,
+            height=page.window.height - 200,
+            expand=False,
             border=ft.border.all(2, ft.Colors.WHITE),
         ),
         on_will_accept=drag_will_accept,
@@ -498,8 +522,9 @@ def main(page: ft.Page):
 
     collage_area = ft.Container(
         content=layouts_init_content,
-        expand=False,
+        alignment=ft.alignment.top_center,
         padding=30,
+        expand=False,
         width=page.window.width - 350,
         height=page.window.height - 200,
         bgcolor=ft.Colors.GREY_500,
