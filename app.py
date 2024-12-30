@@ -166,7 +166,7 @@ def main(page: ft.Page):
             "2 Photos": 2,
             "3 Photos": 3,
             "4 Photos": 4,
-            ">4 Photos": 5,
+            "> Photos": 5,
         }
         filter_value = filter_selection[layout_filter_dropdown.value]
 
@@ -298,8 +298,8 @@ def main(page: ft.Page):
         # Define the region to capture (left, top, right, bottom)
         # TODO define this dynamically
         bbox = (
-            page.window.left + 360 + min_left,
-            page.window.top + 150 + min_top,
+            page.window.left + 370 + min_left,
+            page.window.top + 165 + min_top,
             page.window.left + 380 + max_left,
             page.window.top + 170 + max_top,
         )
