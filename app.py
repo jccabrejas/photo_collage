@@ -1,6 +1,4 @@
 import flet as ft
-import os
-import yaml
 
 from PIL import ImageGrab
 from time import localtime, strftime, sleep
@@ -166,17 +164,6 @@ def main(page: ft.Page):
 
     ## Manage Save Collage work area
     # TODO save image based on states, instead of using ImageGrab
-
-    # collage_details = dict()
-    # collage_details['width']
-    # collage_details['height']
-    # collage_details['bgcolor']
-    # collage_details['items'] = list()
-    # collage_details['items'][0] = dict()
-    # collage_details['items'][0]['uid']
-    # collage_details['items'][0]['src']
-    # collage_details['items'][0]['top']
-    # collage_details['items'][0]['left']
 
     def save_collage(e):
         new_color = e.page.controls[0].controls[-1].content.content.bgcolor
