@@ -1,5 +1,8 @@
 import flet as ft
 
+# drag_will_accept_* and drag_leave_* are the same,
+# splitting them in case different behaviour is required in the future
+
 def drag_will_accept_photo(e):
     e.control.content.border = ft.border.all(
         2, ft.Colors.BLACK45 if e.data == "true" else ft.Colors.RED
