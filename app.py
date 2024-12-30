@@ -10,6 +10,7 @@ from custom_layout_manager import (
     change_position,
     adjust_to_grid,
     make_not_visible,
+    add_collage_area
 )
 
 from drag_handlers import (
@@ -20,6 +21,7 @@ from drag_handlers import (
     drag_accept_layout,
     drag_leave_layout,
 )
+
 
 def main(page: ft.Page):
     page.title = "Photo collage"
@@ -347,50 +349,6 @@ def main(page: ft.Page):
 
     new_layout_area_content = ft.Container(ft.Stack())
 
-    def add_collage_area(e):
-        new_layout_area_content.content.controls.append(
-            ft.GestureDetector(
-                drag_interval=10,
-                top=10,
-                left=10,
-                mouse_cursor=ft.MouseCursor.MOVE,
-                on_pan_update=lambda e: change_position(
-                    e,
-                    selected_top,
-                    selected_left,
-                    selected_width,
-                    selected_height,
-                    page,
-                ),
-                on_pan_end=lambda e: adjust_to_grid(
-                    e,
-                    grid_spacing,
-                    selected_top,
-                    selected_left,
-                    selected_width,
-                    selected_height,
-                    page,
-                ),
-                on_secondary_tap=make_not_visible,
-                content=ft.Container(
-                    border=ft.border.all(5, "white"),
-                    width=(
-                        int(new_collage_width.value)
-                        if new_collage_width.value != ""
-                        else 100
-                    ),
-                    height=(
-                        int(new_collage_height.value)
-                        if new_collage_height.value != ""
-                        else 100
-                    ),
-                    visible=True,
-                ),
-            )
-        )
-        new_layout_area_content.update()
-        page.update()
-
     new_layout_work_content = ft.Column(
         controls=[
             new_collage_width,
@@ -400,7 +358,18 @@ def main(page: ft.Page):
                 icon=ft.Icons.ADD_PHOTO_ALTERNATE,
                 color=ft.Colors.WHITE,
                 bgcolor=ft.Colors.BLUE,
-                on_click=add_collage_area,
+                on_click=lambda e: add_collage_area(
+                    e,
+                    page,
+                    new_layout_area_content,
+                    new_collage_width,
+                    new_collage_height,
+                    grid_spacing,
+                    selected_top,
+                    selected_left,
+                    selected_width,
+                    selected_height,
+                ),
             ),
             new_collage_name,
             new_collage_tags,
@@ -421,7 +390,7 @@ def main(page: ft.Page):
         ]
     )
 
-    # Manage COLLAGE area
+    # Manage PAGE
 
     layouts_init_content = ft.DragTarget(
         group="layout",
@@ -436,8 +405,6 @@ def main(page: ft.Page):
         on_accept=drag_accept_layout,
         on_leave=drag_leave_layout,
     )
-
-    # Manage PAGE
 
     collage_area = ft.Container(
         content=layouts_init_content,
