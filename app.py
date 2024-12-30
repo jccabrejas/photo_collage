@@ -41,6 +41,9 @@ def main(page: ft.Page):
 
     # Manage RAIL area
     def change_view(e):
+        """
+        Change the view based on the selected index in the navigation rail.
+        """
         selected = e.control.selected_index
         if selected == 0:
             refresh_layouts("")
@@ -64,6 +67,9 @@ def main(page: ft.Page):
     ## Manage photos work area
 
     def handle_file_picker(e: ft.FilePickerResultEvent):
+        """
+        Handle the file picker result event.
+        """
         for i in e.files:
             photos_work_area.controls.append(
                 ft.Draggable(
@@ -102,6 +108,9 @@ def main(page: ft.Page):
     ## Manage layouts work area
 
     def load_layout(filename: str) -> ft.Stack:
+        """
+        Load a layout from a YAML file.
+        """
         with open(filename, "r") as file:
             data = yaml.safe_load(file)
         result = list()
@@ -138,6 +147,9 @@ def main(page: ft.Page):
         )
 
     def refresh_layouts(_):
+        """
+        Refresh the layouts work area based on the selected filter.
+        """
         layouts_work_area.controls = list()
         layouts_work_area.controls.append(layout_filter_dropdown)
         filter_selection = {
@@ -181,6 +193,9 @@ def main(page: ft.Page):
                     layouts_work_area.controls.append(ft.Text(filename))
 
     def helper_refresh():
+        """
+        Helper function to refresh the layouts work area.
+        """
         refresh_layouts("")
         work_area.content = layouts_work_area
         work_area.update()
@@ -213,6 +228,9 @@ def main(page: ft.Page):
     ## Manage Background work area
 
     def apply_color(e):
+        """
+        Apply the selected color to the background.
+        """
         if background_color_text.value.lower() in ft.Colors:
             layouts_init_content.content.bgcolor = background_color_text.value
         else:
