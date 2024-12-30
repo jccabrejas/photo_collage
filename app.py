@@ -7,9 +7,6 @@ from time import localtime, strftime, sleep
 
 from custom_layout_manager import (
     save_layout,
-    change_position,
-    adjust_to_grid,
-    make_not_visible,
     add_collage_area
 )
 
