@@ -5,7 +5,13 @@ import yaml
 from PIL import ImageGrab
 from time import localtime, strftime, sleep
 
-from custom_layout_manager import save_layout, change_position, adjust_to_grid, make_not_visible
+from custom_layout_manager import (
+    save_layout,
+    change_position,
+    adjust_to_grid,
+    make_not_visible,
+)
+
 
 def main(page: ft.Page):
     page.title = "Photo collage"
@@ -49,7 +55,7 @@ def main(page: ft.Page):
     # Manage WORK area
 
     ## Manage photos work area
-    def drag_will_accept(e):
+    def drag_will_accept_photo(e):
         e.control.content.border = ft.border.all(
             2, ft.Colors.BLACK45 if e.data == "true" else ft.Colors.RED
         )
@@ -71,6 +77,18 @@ def main(page: ft.Page):
         e.control.content.content.content.src_base64 = None  # needed because otherwise there is a clash with both src and src_base64
         e.control.update()
 
+    def drag_leave_photo(e):
+        e.control.content.border = ft.border.all(
+            2, ft.Colors.WHITE if e.data == "true" else ft.Colors.RED
+        )
+        e.control.update()
+
+    def drag_will_accept_layout(e):
+        e.control.content.border = ft.border.all(
+            2, ft.Colors.BLACK45 if e.data == "true" else ft.Colors.RED
+        )
+        e.control.update()
+
     def drag_accept_layout(e):
         # e.control => DragTarget
         # e.control.content => Container
@@ -79,7 +97,7 @@ def main(page: ft.Page):
         e.control.content.content = src.data
         e.control.update()
 
-    def drag_leave(e):
+    def drag_leave_layout(e):
         e.control.content.border = ft.border.all(
             2, ft.Colors.WHITE if e.data == "true" else ft.Colors.RED
         )
@@ -133,9 +151,9 @@ def main(page: ft.Page):
             collage_item = ft.Container()
             collage_item.content = ft.DragTarget(
                 group="photo",
-                on_will_accept=drag_will_accept,
+                on_will_accept=drag_will_accept_photo,
                 on_accept=drag_accept_photo,
-                on_leave=drag_leave,
+                on_leave=drag_leave_photo,
                 content=ft.Container(
                     content=ft.Image(
                         src_base64=data["layout"]["src_base64"],
@@ -155,7 +173,9 @@ def main(page: ft.Page):
             min_left = min(min_left, collage_item.left)
             max_left = max(max_left, collage_item.content.content.width)
 
-        return ft.Stack(result, width=max_left - min_left + 0, height=max_top - min_top + 0) 
+        return ft.Stack(
+            result, width=max_left - min_left + 0, height=max_top - min_top + 0
+        )
 
     def refresh_layouts(_):
         layouts_work_area.controls = list()
@@ -199,7 +219,6 @@ def main(page: ft.Page):
                 if len(data["layout"]["controls"].keys()) == filter_value:
                     layouts_work_area.controls.append(temp)
                     layouts_work_area.controls.append(ft.Text(filename))
-
 
     def helper_refresh():
         refresh_layouts("")
@@ -287,9 +306,13 @@ def main(page: ft.Page):
             photo.update()
 
             min_top = min(min_top, collage_item.top)
-            max_top = max(max_top, collage_item.top + collage_item.content.content.height)
+            max_top = max(
+                max_top, collage_item.top + collage_item.content.content.height
+            )
             min_left = min(min_left, collage_item.left)
-            max_left = max(max_left, collage_item.left + collage_item.content.content.width)
+            max_left = max(
+                max_left, collage_item.left + collage_item.content.content.width
+            )
 
         e.page.controls[0].controls[-1].content.content.update()
         sleep(0.2)  # seconds
@@ -361,7 +384,6 @@ def main(page: ft.Page):
     selected_width = ft.Text()
     selected_height = ft.Text()
 
-
     new_layout_area_content = ft.Container(ft.Stack())
 
     def add_collage_area(e):
@@ -371,8 +393,23 @@ def main(page: ft.Page):
                 top=10,
                 left=10,
                 mouse_cursor=ft.MouseCursor.MOVE,
-                on_pan_update=lambda e: change_position(e, selected_top, selected_left, selected_width, selected_height, page),
-                on_pan_end=lambda e: adjust_to_grid(e, grid_spacing, selected_top, selected_left, selected_width, selected_height, page),
+                on_pan_update=lambda e: change_position(
+                    e,
+                    selected_top,
+                    selected_left,
+                    selected_width,
+                    selected_height,
+                    page,
+                ),
+                on_pan_end=lambda e: adjust_to_grid(
+                    e,
+                    grid_spacing,
+                    selected_top,
+                    selected_left,
+                    selected_width,
+                    selected_height,
+                    page,
+                ),
                 on_secondary_tap=make_not_visible,
                 content=ft.Container(
                     border=ft.border.all(5, "white"),
@@ -393,7 +430,6 @@ def main(page: ft.Page):
         new_layout_area_content.update()
         page.update()
 
-
     new_layout_work_content = ft.Column(
         controls=[
             new_collage_width,
@@ -413,7 +449,9 @@ def main(page: ft.Page):
                 icon=ft.Icons.SAVE_OUTLINED,
                 color=ft.Colors.WHITE,
                 bgcolor=ft.Colors.BLUE,
-                on_click=lambda e: save_layout(page, new_collage_name, new_collage_tags, new_layout_area_content),
+                on_click=lambda e: save_layout(
+                    page, new_collage_name, new_collage_tags, new_layout_area_content
+                ),
             ),
             ft.Row(controls=[ft.Text("Top: "), selected_top]),
             ft.Row(controls=[ft.Text("Left: "), selected_left]),
@@ -433,11 +471,10 @@ def main(page: ft.Page):
             expand=False,
             border=ft.border.all(2, ft.Colors.WHITE),
         ),
-        on_will_accept=drag_will_accept,
+        on_will_accept=drag_will_accept_layout,
         on_accept=drag_accept_layout,
-        on_leave=drag_leave,
+        on_leave=drag_leave_layout,
     )
-
 
     # Manage PAGE
 
