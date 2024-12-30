@@ -1,12 +1,11 @@
-import base64
 import flet as ft
 import os
 import yaml
 
 from PIL import ImageGrab
-from io import BytesIO
 from time import localtime, strftime, sleep
 
+from custom_layout_manager import save_layout, change_position, adjust_to_grid, make_not_visible
 
 def main(page: ft.Page):
     page.title = "Photo collage"
@@ -56,7 +55,7 @@ def main(page: ft.Page):
         )
         e.control.update()
 
-    def drag_accept(e):
+    def drag_accept_photo(e):
         # e.control => DragTarget
         # e.control.content => Container
         # e.control.content.content => Image
@@ -135,7 +134,7 @@ def main(page: ft.Page):
             collage_item.content = ft.DragTarget(
                 group="photo",
                 on_will_accept=drag_will_accept,
-                on_accept=drag_accept,
+                on_accept=drag_accept_photo,
                 on_leave=drag_leave,
                 content=ft.Container(
                     content=ft.Image(
@@ -362,9 +361,6 @@ def main(page: ft.Page):
     selected_width = ft.Text()
     selected_height = ft.Text()
 
-    def make_not_visible(e):
-        e.control.visible = False
-        e.control.update()
 
     new_layout_area_content = ft.Container(ft.Stack())
 
@@ -375,8 +371,8 @@ def main(page: ft.Page):
                 top=10,
                 left=10,
                 mouse_cursor=ft.MouseCursor.MOVE,
-                on_pan_update=change_position,
-                on_pan_end=adjust_to_grid,
+                on_pan_update=lambda e: change_position(e, selected_top, selected_left, selected_width, selected_height, page),
+                on_pan_end=lambda e: adjust_to_grid(e, grid_spacing, selected_top, selected_left, selected_width, selected_height, page),
                 on_secondary_tap=make_not_visible,
                 content=ft.Container(
                     border=ft.border.all(5, "white"),
@@ -397,52 +393,6 @@ def main(page: ft.Page):
         new_layout_area_content.update()
         page.update()
 
-    def save_layout(e):
-        filename = ".\\assets\\layouts\\" + new_collage_name.value + ".yml"
-        data = dict()
-        data["layout"] = dict()
-        data["layout"]["name"] = new_collage_name.value.replace(" ", "_")
-        data["layout"]["tags"] = new_collage_tags.value.replace(" ", "").replace(
-            ",,", ","
-        )
-
-        data["layout"]["controls"] = dict()
-        min_top, max_top, min_left, max_left = 0, 0, 0, 0
-        for index, c in enumerate(new_layout_area_content.content.controls):
-            if c.visible:
-                data["layout"]["controls"][index] = dict()
-                data["layout"]["controls"][index]["top"] = c.top
-                data["layout"]["controls"][index]["left"] = c.left
-                data["layout"]["controls"][index]["width"] = c.content.width
-                data["layout"]["controls"][index]["height"] = c.content.height
-
-            min_top = min(min_top, c.top)
-            max_top = max(max_top, c.top + c.content.height)
-            min_left = min(min_left, c.left)
-            max_left = max(max_left, c.left + c.content.width)
-
-        # Define the region to capture (left, top, right, bottom)
-        bbox = (
-            page.window.left + 360 + min_left,
-            page.window.top + 150 + min_top,
-            page.window.left + 380 + max_left,
-            page.window.top + 170 + max_top,
-        )
-
-        image = ImageGrab.grab(bbox)
-        temp = (
-            ".\\assets\\layouts\\thumbnails\\"
-            + new_collage_name.value.replace(" ", "_")
-            + ".png"
-        )
-        image.save(temp)
-        buffered = BytesIO()
-        image.save(buffered, format="PNG")
-        img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-        data["layout"]["src"] = temp
-        data["layout"]["src_base64"] = img_str
-        with open(filename, "w") as file:
-            yaml.safe_dump(data, file)
 
     new_layout_work_content = ft.Column(
         controls=[
@@ -463,7 +413,7 @@ def main(page: ft.Page):
                 icon=ft.Icons.SAVE_OUTLINED,
                 color=ft.Colors.WHITE,
                 bgcolor=ft.Colors.BLUE,
-                on_click=save_layout,
+                on_click=lambda e: save_layout(page, new_collage_name, new_collage_tags, new_layout_area_content),
             ),
             ft.Row(controls=[ft.Text("Top: "), selected_top]),
             ft.Row(controls=[ft.Text("Left: "), selected_left]),
@@ -488,35 +438,6 @@ def main(page: ft.Page):
         on_leave=drag_leave,
     )
 
-    def change_position(e: ft.DragUpdateEvent):
-        if abs(e.control.content.width - e.local_x) < 10:
-            e.control.content.width = max(0, e.local_x)
-        elif abs(e.control.content.height - e.local_y) < 10:
-            e.control.content.height = max(0, e.local_y)
-        else:
-            e.control.top = max(0, e.control.top + e.delta_y)
-            e.control.left = max(0, e.control.left + e.delta_x)
-        print(e.control.content.width, e.control.content.height)
-        selected_top.value = e.control.top
-        selected_left.value = e.control.left
-        selected_width.value = e.control.content.width
-        selected_height.value = e.control.content.height
-        e.control.content.update()
-        e.control.update()
-        page.update()
-
-    def adjust_to_grid(e: ft.DragEndEvent):
-        grid_space = int(grid_spacing.value)
-        remainder_top = (e.control.top) % grid_space
-        remainder_left = (e.control.left) % grid_space
-        e.control.top = max(0, e.control.top - remainder_top)
-        e.control.left = max(0, e.control.left - remainder_left)
-        selected_top.value = e.control.top
-        selected_left.value = e.control.left
-        selected_width.value = e.control.content.width
-        selected_height.value = e.control.content.height
-        e.control.update()
-        page.update()
 
     # Manage PAGE
 
