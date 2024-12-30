@@ -5,7 +5,13 @@ from PIL import ImageGrab
 from io import BytesIO
 
 
-def save_layout(page, new_collage_name, new_collage_tags, new_layout_area_content):
+def save_layout(page: ft.Page,
+                new_collage_name: ft.TextField,
+                new_collage_tags: ft.TextField,
+                new_layout_area_content: ft.Container):
+    """
+    Save the current layout to a YAML file and create a thumbnail image.
+    """
     filename = ".\\assets\\layouts\\" + new_collage_name.value + ".yml"
     data = dict()
     data["layout"] = dict()
@@ -51,14 +57,18 @@ def save_layout(page, new_collage_name, new_collage_tags, new_layout_area_conten
         yaml.safe_dump(data, file)
 
 
-def change_position(
+def change_position_and_size(
     e: ft.DragUpdateEvent,
-    selected_top,
-    selected_left,
-    selected_width,
-    selected_height,
-    page,
+    selected_top: ft.Text,
+    selected_left: ft.Text,
+    selected_width: ft.Text,
+    selected_height: ft.Text,
+    page: ft.Page,
 ):
+    """
+    Change the position of a draggable item.
+    If you click close to left and bottom borders, resize the item.
+    """
     if abs(e.control.content.width - e.local_x) < 10:
         e.control.content.width = max(0, e.local_x)
     elif abs(e.control.content.height - e.local_y) < 10:
@@ -78,14 +88,18 @@ def change_position(
 
 def adjust_to_grid(
     e: ft.DragEndEvent,
-    grid_spacing,
-    selected_top,
-    selected_left,
-    selected_width,
-    selected_height,
-    page,
+    grid_spacing : ft.TextField,
+    selected_top: ft.Text,
+    selected_left: ft.Text,
+    selected_width: ft.Text,
+    selected_height: ft.Text,
+    page: ft.Page,
 ):
-    grid_space = int(grid_spacing.value)
+    """
+    Adjust the position of a draggable item to a grid
+    and feedback position (top & left) and size (width & height).
+    """
+    grid_space = max(1, int(grid_spacing.value))
     remainder_top = (e.control.top) % grid_space
     remainder_left = (e.control.left) % grid_space
     e.control.top = max(0, e.control.top - remainder_top)
@@ -121,7 +135,7 @@ def add_collage_area(
             top=10,
             left=10,
             mouse_cursor=ft.MouseCursor.MOVE,
-            on_pan_update=lambda e: change_position(
+            on_pan_update=lambda e: change_position_and_size(
                 e,
                 selected_top,
                 selected_left,
