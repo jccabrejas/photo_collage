@@ -97,7 +97,7 @@ def adjust_to_grid(
 ):
     """
     Adjust the position of a draggable item to a grid
-    and feedback position (top & left) and size (width & height).
+    and feed back position (top & left) and size (width & height).
     """
     grid_space = max(1, int(grid_spacing.value))
     remainder_top = (e.control.top) % grid_space
@@ -129,6 +129,9 @@ def add_collage_area(
     selected_width,
     selected_height,
 ):
+    """
+    Add a new collage area to the layout.
+    """
     new_layout_area_content.content.controls.append(
         ft.GestureDetector(
             drag_interval=10,
