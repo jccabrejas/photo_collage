@@ -5,6 +5,7 @@ from time import localtime, strftime, sleep
 
 from custom_layout_manager import save_layout, add_collage_area
 from layout_loader_manager import refresh_layouts
+from background_manager import apply_color
 from drag_handlers import (
     drag_will_accept_photo,
     drag_accept_photo,
@@ -129,16 +130,6 @@ def main(page: ft.Page):
 
     ## Manage Background work area
 
-    def apply_color(e):
-        """
-        Apply the selected color to the background.
-        """
-        if background_color_text.value.lower() in ft.Colors:
-            layouts_init_content.content.bgcolor = background_color_text.value
-        else:
-            layouts_init_content.content.bgcolor = ft.Colors.WHITE
-        layouts_init_content.update()
-
     background_color_text = ft.TextField(label="Color", prefix_icon=ft.Icons.COLOR_LENS)
     background_work_area = ft.Column(
         controls=[
@@ -148,7 +139,7 @@ def main(page: ft.Page):
                 icon=ft.Icons.SAVE_OUTLINED,
                 color=ft.Colors.WHITE,
                 bgcolor=ft.Colors.BLUE,
-                on_click=apply_color,
+                on_click=lambda e: apply_color(e, background_color_text, layouts_init_content),
             ),
         ],
         width=300,
