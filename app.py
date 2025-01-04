@@ -200,6 +200,7 @@ def main(page: ft.Page):
     selected_left = ft.Text()
     selected_width = ft.Text()
     selected_height = ft.Text()
+    info_text = ft.Text(value="Press Ctrl and drag right and bottom borders to resize")
 
     new_layout_area_content = ft.Container(ft.Stack())
 
@@ -241,6 +242,7 @@ def main(page: ft.Page):
             ft.Row(controls=[ft.Text("Left: "), selected_left]),
             ft.Row(controls=[ft.Text("Width: "), selected_width]),
             ft.Row(controls=[ft.Text("Height: "), selected_height]),
+            info_text
         ]
     )
 
