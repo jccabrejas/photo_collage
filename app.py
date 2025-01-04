@@ -6,6 +6,7 @@ from time import localtime, strftime, sleep
 from custom_layout_manager import save_layout, add_collage_area
 from layout_loader_manager import refresh_layouts
 from background_manager import apply_color
+from save_photo_manager import save_collage
 from drag_handlers import (
     drag_will_accept_photo,
     drag_accept_photo,
@@ -149,50 +150,6 @@ def main(page: ft.Page):
     )
 
     ## Manage Save Collage work area
-    # TODO save image based on states, instead of using ImageGrab
-
-    def save_collage(e):
-        new_color = e.page.controls[0].controls[-1].content.content.bgcolor
-        e.page.controls[0].controls[-1].content.content.border = ft.border.all(
-            1, new_color
-        )
-        min_top, max_top, min_left, max_left = 0, 0, 0, 0
-
-        for collage_item in (
-            e.page.controls[0].controls[-1].content.content.content.controls
-        ):
-            photo = collage_item.content.content
-            photo.border = ft.border.all(1, new_color)
-            photo.update()
-
-            min_top = min(min_top, collage_item.top)
-            max_top = max(
-                max_top, collage_item.top + collage_item.content.content.height
-            )
-            min_left = min(min_left, collage_item.left)
-            max_left = max(
-                max_left, collage_item.left + collage_item.content.content.width
-            )
-
-        e.page.controls[0].controls[-1].content.content.update()
-        sleep(0.2)  # seconds
-
-        # Define the region to capture (left, top, right, bottom)
-        # TODO define this dynamically
-        bbox = (
-            page.window.left + 370 + min_left,
-            page.window.top + 165 + min_top,
-            page.window.left + 380 + max_left,
-            page.window.top + 170 + max_top,
-        )
-
-        image = ImageGrab.grab(bbox)
-        temp = (
-            ".\\output\\"
-            + save_photo_filename_text.value.replace(" ", "_")
-            + photo_extension_dropdown.value
-        )
-        image.save(temp)
 
     save_photo_filename_text = ft.TextField(
         label="File name",
@@ -218,7 +175,7 @@ def main(page: ft.Page):
                 icon=ft.Icons.SAVE_OUTLINED,
                 color=ft.Colors.WHITE,
                 bgcolor=ft.Colors.BLUE,
-                on_click=save_collage,
+                on_click=lambda e: save_collage(e, page, save_photo_filename_text, photo_extension_dropdown),
             ),
         ],
         width=300,
