@@ -139,7 +139,7 @@ def main(page: ft.Page):
                 icon=ft.Icons.SAVE_OUTLINED,
                 color=ft.Colors.WHITE,
                 bgcolor=ft.Colors.BLUE,
-                on_click=lambda e: apply_color(e, background_color_text, layouts_init_content),
+                on_click=lambda _: apply_color(background_color_text, layouts_init_content),
             ),
         ],
         width=300,
