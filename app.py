@@ -41,7 +41,7 @@ def main(page: ft.Page):
         """
         selected = e.control.selected_index
         if selected == 0:
-            refresh_layouts("", page, layouts_work_area, layout_filter_dropdown)
+            refresh_layouts(layouts_work_area, layout_filter_dropdown)
             work_area.content = layouts_work_area
             collage_area.content = layouts_init_content
             collage_area.update()
@@ -113,7 +113,6 @@ def main(page: ft.Page):
         ],
         value="All",
         on_change=lambda _: helper_refresh(
-            page,
             layouts_work_area,
             layout_filter_dropdown,
             work_area,
@@ -130,7 +129,7 @@ def main(page: ft.Page):
         scroll="always",
     )
 
-    refresh_layouts("", page, layouts_work_area, layout_filter_dropdown)
+    refresh_layouts(layouts_work_area, layout_filter_dropdown)
 
     ## Manage Background work area
 

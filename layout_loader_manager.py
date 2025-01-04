@@ -5,7 +5,7 @@ import os
 from drag_handlers import *
 
 
-def load_layout(filename: str, page: ft.Page) -> ft.Stack:
+def load_layout(filename: str) -> ft.Stack:
     """
     Load a layout from a YAML file.
     """
@@ -33,7 +33,6 @@ def load_layout(filename: str, page: ft.Page) -> ft.Stack:
         )
         collage_item.top = v["top"]
         collage_item.left = v["left"]
-        page.update()
         result.append(collage_item)
         min_top = min(min_top, collage_item.top)
         max_top = max(max_top, collage_item.content.content.height)
@@ -44,7 +43,6 @@ def load_layout(filename: str, page: ft.Page) -> ft.Stack:
 
 
 def refresh_layouts(
-    _, page, 
     layouts_work_area: ft.Column, 
     layout_filter_dropdown: ft.Dropdown
 ):
@@ -78,7 +76,7 @@ def refresh_layouts(
                 repeat=ft.ImageRepeat.NO_REPEAT,
                 border_radius=ft.border_radius.all(10),
             ),
-            data=load_layout(".\\assets\\layouts\\" + filename, page),
+            data=load_layout(".\\assets\\layouts\\" + filename),
         )
 
         if layout_filter_dropdown.value == "All":
@@ -94,12 +92,15 @@ def refresh_layouts(
                 layouts_work_area.controls.append(ft.Text(filename))
 
 
-def helper_refresh(page, layouts_work_area, layout_filter_dropdown, work_area, collage_area, layouts_init_content):
+def helper_refresh(layouts_work_area, layout_filter_dropdown, work_area, collage_area, layouts_init_content):
     """
     Helper function to refresh the layouts work area.
     """
-    refresh_layouts("", page, layouts_work_area, layout_filter_dropdown)
+    refresh_layouts(layouts_work_area, layout_filter_dropdown)
     work_area.content = layouts_work_area
     work_area.update()
     collage_area.content = layouts_init_content
     collage_area.update()
+
+if __name__ == "__main__":
+    pass
