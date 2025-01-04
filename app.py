@@ -116,8 +116,6 @@ def main(page: ft.Page):
             layouts_work_area,
             layout_filter_dropdown,
             work_area,
-            collage_area,
-            layouts_init_content,
         ),
     )
 

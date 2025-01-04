@@ -92,15 +92,13 @@ def refresh_layouts(
                 layouts_work_area.controls.append(ft.Text(filename))
 
 
-def helper_refresh(layouts_work_area, layout_filter_dropdown, work_area, collage_area, layouts_init_content):
+def helper_refresh(layouts_work_area, layout_filter_dropdown, work_area):
     """
     Helper function to refresh the layouts work area.
     """
     refresh_layouts(layouts_work_area, layout_filter_dropdown)
     work_area.content = layouts_work_area
     work_area.update()
-    collage_area.content = layouts_init_content
-    collage_area.update()
 
 if __name__ == "__main__":
     pass
