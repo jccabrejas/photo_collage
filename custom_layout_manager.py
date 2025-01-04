@@ -76,7 +76,6 @@ def change_position_and_size(
     elif not keyboard.is_pressed("ctrl"):
         e.control.top = max(0, e.control.top + e.delta_y)
         e.control.left = max(0, e.control.left + e.delta_x)
-    print(e.control.content.width, e.control.content.height)
     selected_top.value = e.control.top
     selected_left.value = e.control.left
     selected_width.value = e.control.content.width
@@ -102,8 +101,12 @@ def adjust_to_grid(
     grid_space = max(1, int(grid_spacing.value))
     remainder_top = (e.control.top) % grid_space
     remainder_left = (e.control.left) % grid_space
+    remainder_width = (e.control.content.width) % grid_space
+    remainder_height = (e.control.content.height) % grid_space
     e.control.top = max(0, e.control.top - remainder_top)
     e.control.left = max(0, e.control.left - remainder_left)
+    e.control.content.width = max(0, e.control.content.width - remainder_width)
+    e.control.content.height = max(0, e.control.content.height - remainder_height)
     selected_top.value = e.control.top
     selected_left.value = e.control.left
     selected_width.value = e.control.content.width
