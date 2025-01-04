@@ -44,7 +44,8 @@ def load_layout(filename: str) -> ft.Stack:
 
 def refresh_layouts(
     layouts_work_area: ft.Column, 
-    layout_filter_dropdown: ft.Dropdown
+    layout_filter_dropdown: ft.Dropdown,
+    work_area: ft.Container
 ):
     """
     Refresh the layouts work area based on the selected filter.
@@ -91,12 +92,6 @@ def refresh_layouts(
                 layouts_work_area.controls.append(temp)
                 layouts_work_area.controls.append(ft.Text(filename))
 
-
-def helper_refresh(layouts_work_area, layout_filter_dropdown, work_area):
-    """
-    Helper function to refresh the layouts work area.
-    """
-    refresh_layouts(layouts_work_area, layout_filter_dropdown)
     work_area.content = layouts_work_area
     work_area.update()
 

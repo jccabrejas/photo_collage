@@ -4,7 +4,7 @@ from PIL import ImageGrab
 from time import localtime, strftime, sleep
 
 from custom_layout_manager import save_layout, add_collage_area
-from layout_loader_manager import load_layout, refresh_layouts, helper_refresh
+from layout_loader_manager import refresh_layouts
 from drag_handlers import (
     drag_will_accept_photo,
     drag_accept_photo,
@@ -41,7 +41,7 @@ def main(page: ft.Page):
         """
         selected = e.control.selected_index
         if selected == 0:
-            refresh_layouts(layouts_work_area, layout_filter_dropdown)
+            refresh_layouts(layouts_work_area, layout_filter_dropdown, work_area)
             work_area.content = layouts_work_area
             collage_area.content = layouts_init_content
             collage_area.update()
@@ -112,7 +112,7 @@ def main(page: ft.Page):
             ft.dropdown.Option("> Photos"),
         ],
         value="All",
-        on_change=lambda _: helper_refresh(
+        on_change=lambda _: refresh_layouts(
             layouts_work_area,
             layout_filter_dropdown,
             work_area,
@@ -126,8 +126,6 @@ def main(page: ft.Page):
         alignment=ft.MainAxisAlignment.START,
         scroll="always",
     )
-
-    refresh_layouts(layouts_work_area, layout_filter_dropdown)
 
     ## Manage Background work area
 
@@ -390,5 +388,6 @@ def main(page: ft.Page):
         )
     )
 
+    refresh_layouts(layouts_work_area, layout_filter_dropdown, work_area)
 
 ft.app(target=main)
