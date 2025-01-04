@@ -390,4 +390,5 @@ def main(page: ft.Page):
 
     refresh_layouts(layouts_work_area, layout_filter_dropdown, work_area)
 
+
 ft.app(target=main)
