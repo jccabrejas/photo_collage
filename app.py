@@ -1,4 +1,5 @@
 import flet as ft
+import os
 
 from PIL import ImageGrab
 from time import localtime, strftime, sleep
@@ -81,9 +82,55 @@ def main(page: ft.Page):
                     ),
                 )
             )
+            print(i)
+            print(i.path)
+            print(photos_work_area.controls[-1].content.src)
             photos_work_area.controls.append(ft.Text(value=i.name))
             photos_work_area.update()
+    def upload_files(e):
+        uf = []
+        if file_picker.result is not None and file_picker.result.files is not None:
+            for f in file_picker.result.files:
+                uf.append(
+                    ft.FilePickerUploadFile(
+                        f.name,
+                        upload_url=page.get_upload_url(f.name, 600),
+                    )
+                )
+                print(f)
+                print(f.name)
+                print(page.get_upload_url(f.name, 600))
+            file_picker.upload(uf)
+            
+            for f in os.listdir(".\\uploads"):
+                print(f)
+                src="/upload/"+f
+                print(src)
+                photos_work_area.controls.append(
+                    ft.Draggable(
+                        group="photo",
+                        content=ft.Image(
+                            src=src,
+                            width=100,
+                            height=100,
+                            fit=ft.ImageFit.CONTAIN,
+                            repeat=ft.ImageRepeat.NO_REPEAT,
+                            border_radius=ft.border_radius.all(10),
+                        ),
+                    )
+                )
+                photos_work_area.controls.append(ft.Text(value=f))
+                photos_work_area.update()
 
+    # from typing import Dict
+    # prog_bars: Dict[str, ft.ProgressRing] = {}
+    # def on_upload_progress(e: ft.FilePickerUploadEvent):
+    #     prog_bars[e.file_name].value = e.progress
+    #     prog_bars[e.file_name].update()
+
+    secret_key = os.getenv ( "FLET_SECRET_KEY" , default=None )
+    if not secret_key:
+        os.environ [ "FLET_SECRET_KEY" ] = os.urandom ( 12 ).hex ( )
     file_picker = ft.FilePicker(on_result=handle_file_picker)
     page.overlay.append(file_picker)
     photos_work_area = ft.Column(
@@ -94,6 +141,13 @@ def main(page: ft.Page):
                 color=ft.Colors.WHITE,
                 bgcolor=ft.Colors.BLUE,
                 on_click=lambda _: file_picker.pick_files(allow_multiple=True),
+            ),
+            ft.FilledButton(
+                text="Upload photos",
+                icon=ft.Icons.FOLDER_OPEN,
+                color=ft.Colors.WHITE,
+                bgcolor=ft.Colors.BLUE,
+                on_click=upload_files,
             ),
         ],
         width=300,
@@ -341,4 +395,4 @@ def main(page: ft.Page):
     refresh_layouts(layouts_work_area, layout_filter_dropdown, work_area)
 
 
-ft.app(target=main)
+ft.app(target=main, upload_dir="uploads", view=ft.WEB_BROWSER)
