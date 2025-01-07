@@ -97,15 +97,13 @@ def main(page: ft.Page):
                         upload_url=page.get_upload_url(f.name, 600),
                     )
                 )
-                print(f)
-                print(f.name)
-                print(page.get_upload_url(f.name, 600))
             file_picker.upload(uf)
-            
-            for f in os.listdir(".\\uploads"):
-                print(f)
-                src="/upload/"+f
-                print(src)
+
+    def on_upload_progress(e: ft.FilePickerUploadEvent):
+        if e.progress == 1.0:
+            f = e.file_name
+            src="uploads/"+f
+            if f in os.listdir(".\\assets\\uploads"):
                 photos_work_area.controls.append(
                     ft.Draggable(
                         group="photo",
@@ -122,16 +120,9 @@ def main(page: ft.Page):
                 photos_work_area.controls.append(ft.Text(value=f))
                 photos_work_area.update()
 
-    # from typing import Dict
-    # prog_bars: Dict[str, ft.ProgressRing] = {}
-    # def on_upload_progress(e: ft.FilePickerUploadEvent):
-    #     prog_bars[e.file_name].value = e.progress
-    #     prog_bars[e.file_name].update()
-
-    secret_key = os.getenv ( "FLET_SECRET_KEY" , default=None )
-    if not secret_key:
-        os.environ [ "FLET_SECRET_KEY" ] = os.urandom ( 12 ).hex ( )
-    file_picker = ft.FilePicker(on_result=handle_file_picker)
+    secret_key = os.urandom ( 12 ).hex ( )
+    os.environ [ "FLET_SECRET_KEY" ] = secret_key
+    file_picker = ft.FilePicker(on_result=upload_files, on_upload=on_upload_progress)
     page.overlay.append(file_picker)
     photos_work_area = ft.Column(
         controls=[
@@ -141,13 +132,6 @@ def main(page: ft.Page):
                 color=ft.Colors.WHITE,
                 bgcolor=ft.Colors.BLUE,
                 on_click=lambda _: file_picker.pick_files(allow_multiple=True),
-            ),
-            ft.FilledButton(
-                text="Upload photos",
-                icon=ft.Icons.FOLDER_OPEN,
-                color=ft.Colors.WHITE,
-                bgcolor=ft.Colors.BLUE,
-                on_click=upload_files,
             ),
         ],
         width=300,
@@ -395,4 +379,4 @@ def main(page: ft.Page):
     refresh_layouts(layouts_work_area, layout_filter_dropdown, work_area)
 
 
-ft.app(target=main, upload_dir="uploads", view=ft.WEB_BROWSER)
+ft.app(target=main, assets_dir="assets", upload_dir="assets/uploads", view=ft.WEB_BROWSER)
