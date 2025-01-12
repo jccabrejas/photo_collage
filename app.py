@@ -3,6 +3,7 @@ import os
 
 from PIL import ImageGrab
 from time import localtime, strftime, sleep
+from pathlib import Path
 
 from custom_layout_manager import save_layout, add_collage_area
 from layout_loader_manager import refresh_layouts
@@ -100,10 +101,11 @@ def main(page: ft.Page):
             file_picker.upload(uf)
 
     def on_upload_progress(e: ft.FilePickerUploadEvent):
+        files_uploaded = [x.name for x in Path('./assets/uploads').glob("*.*")]
         if e.progress == 1.0:
             f = e.file_name
             src="uploads/"+f
-            if f in os.listdir(".\\assets\\uploads"):
+            if f in files_uploaded:
                 photos_work_area.controls.append(
                     ft.Draggable(
                         group="photo",

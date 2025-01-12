@@ -4,7 +4,7 @@ import yaml
 from PIL import ImageGrab
 from io import BytesIO
 from pathlib import Path
-import keyboard
+import keyboard # TODO ImportError: You must be root to use this library on linux.
 
 def save_layout(page: ft.Page,
                 new_collage_name: ft.TextField,
@@ -65,11 +65,11 @@ def change_position_and_size(
 ):
     """
     Change the position of a draggable item.
-    If you click close to left and bottom borders, resize the item.
+    If you click close to left and bottom borders while using Ctrl key, resize the item.
     """
-    if abs(e.control.content.width - e.local_x) < 10 and keyboard.is_pressed("ctrl"):
+    if abs(e.control.content.width - e.local_x) < 50 and keyboard.is_pressed("ctrl"):
         e.control.content.width = max(0, e.local_x)
-    elif abs(e.control.content.height - e.local_y) < 10 and keyboard.is_pressed("ctrl"):
+    elif abs(e.control.content.height - e.local_y) < 50 and keyboard.is_pressed("ctrl"):
         e.control.content.height = max(0, e.local_y)
     elif not keyboard.is_pressed("ctrl"):
         e.control.top = max(0, e.control.top + e.delta_y)
