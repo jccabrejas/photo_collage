@@ -1,4 +1,5 @@
 import flet as ft
+import yaml
 
 from PIL import ImageGrab
 from time import localtime, strftime, sleep
@@ -204,6 +205,41 @@ def main(page: ft.Page):
 
     new_layout_area_content = ft.Container(ft.Stack())
 
+    def handle_layout_file_picker(e: ft.FilePickerResultEvent,
+        page=page,
+        new_layout_area_content=new_layout_area_content,
+        grid_spacing=grid_spacing,
+        selected_top=selected_top,
+        selected_left=selected_left,
+        selected_width=selected_width,
+        selected_height=selected_height,
+        ):
+        """
+        Handle the file picker result event.
+        """
+        for i in e.files:
+            with open(i.path, "r") as file:
+                data = yaml.safe_load(file)
+                for c in data["layout"]["controls"]:
+                    add_collage_area(
+                        e,
+                        page,
+                        new_layout_area_content,
+                        ft.TextField(value=data["layout"]["controls"][c]["width"]),
+                        ft.TextField(value=data["layout"]["controls"][c]["height"]),
+                        grid_spacing,
+                        selected_top,
+                        selected_left,
+                        selected_width,
+                        selected_height,
+                        top=data["layout"]["controls"][c]["top"],
+                        left=data["layout"]["controls"][c]["left"]
+                    )
+        new_layout_area_content.update()
+
+    file_layout_picker = ft.FilePicker(on_result=handle_layout_file_picker)
+    page.overlay.append(file_layout_picker)
+
     new_layout_work_content = ft.Column(
         controls=[
             new_collage_width,
@@ -242,7 +278,14 @@ def main(page: ft.Page):
             ft.Row(controls=[ft.Text("Left: "), selected_left]),
             ft.Row(controls=[ft.Text("Width: "), selected_width]),
             ft.Row(controls=[ft.Text("Height: "), selected_height]),
-            info_text
+            info_text,
+            ft.FilledButton(
+                text="Load layout area",
+                icon=ft.Icons.UPLOAD_FILE,
+                color=ft.Colors.WHITE,
+                bgcolor=ft.Colors.BLUE,
+                on_click=lambda _: file_layout_picker.pick_files(allow_multiple=False)
+            ),
         ]
     )
 

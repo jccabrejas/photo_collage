@@ -131,6 +131,8 @@ def add_collage_area(
     selected_left,
     selected_width,
     selected_height,
+    top=10,
+    left=10
 ):
     """
     Add a new collage area to the layout.
@@ -138,8 +140,8 @@ def add_collage_area(
     new_layout_area_content.content.controls.append(
         ft.GestureDetector(
             drag_interval=10,
-            top=10,
-            left=10,
+            top=top,
+            left=left,
             mouse_cursor=ft.MouseCursor.MOVE,
             on_pan_update=lambda e: change_position_and_size(
                 e,
