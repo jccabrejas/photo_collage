@@ -3,6 +3,7 @@ import flet as ft
 import yaml
 from PIL import ImageGrab
 from io import BytesIO
+from pathlib import Path
 import keyboard
 
 def save_layout(page: ft.Page,
@@ -12,7 +13,8 @@ def save_layout(page: ft.Page,
     """
     Save the current layout to a YAML file and create a thumbnail image.
     """
-    filename = ".\\assets\\layouts\\" + new_collage_name.value + ".yml"
+    p = Path('./assets/layouts') 
+    filename = str(p / (new_collage_name.value + ".yml"))
     data = dict()
     data["layout"] = dict()
     data["layout"]["name"] = new_collage_name.value.replace(" ", "_")
@@ -42,11 +44,7 @@ def save_layout(page: ft.Page,
     )
 
     image = ImageGrab.grab(bbox)
-    temp = (
-        ".\\assets\\layouts\\thumbnails\\"
-        + new_collage_name.value.replace(" ", "_")
-        + ".png"
-    )
+    temp = str(p / "thumbnails" / (new_collage_name.value.replace(" ", "_") + ".png"))
     image.save(temp)
     buffered = BytesIO()
     image.save(buffered, format="PNG")
