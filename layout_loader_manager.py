@@ -1,6 +1,7 @@
 import flet as ft
 import yaml
 import os
+from pathlib import Path
 
 from drag_handlers import *
 
@@ -61,23 +62,24 @@ def refresh_layouts(
     }
     filter_value = filter_selection[layout_filter_dropdown.value]
 
-    for filename in os.listdir(r".\assets\layouts"):
-        if filename[-4:] != ".yml":
-            continue
-        with open(".\\assets\\layouts\\" + filename, "r") as file:
+    p = Path('./assets/layouts') 
+
+    layouts = [x.name for x in Path('./assets/layouts').glob("*.yml")]
+    for filename in layouts:
+        with open(str(p / filename), "r") as file:
             data = yaml.safe_load(file)
         temp = ft.Draggable(
             group="layout",
             content=ft.Image(
                 src_base64=data["layout"]["src_base64"],
-                src=".\\assets\\layouts\\thumbnails\\" + filename[:-4] + ".png",
+                src=str(Path('./assets/layouts\thumbnails') / (filename[:-4] + ".png")),
                 width=100,
                 height=100,
                 fit=ft.ImageFit.CONTAIN,
                 repeat=ft.ImageRepeat.NO_REPEAT,
                 border_radius=ft.border_radius.all(10),
             ),
-            data=load_layout(".\\assets\\layouts\\" + filename),
+            data=load_layout(str(p / filename)),
         )
 
         if layout_filter_dropdown.value == "All":
