@@ -1,6 +1,7 @@
 import flet as ft
 from time import sleep
 from PIL import ImageGrab
+from pathlib import Path
 
 # TODO save image based on states, instead of using ImageGrab
 
@@ -40,9 +41,8 @@ def save_collage(e, page, save_photo_filename_text, photo_extension_dropdown):
     )
 
     image = ImageGrab.grab(bbox)
-    temp = (
-        ".\\output\\"
-        + save_photo_filename_text.value.replace(" ", "_")
-        + photo_extension_dropdown.value
+    temp = str(Path('./output')
+        / save_photo_filename_text.value.replace(" ", "_")
+        / photo_extension_dropdown.value
     )
     image.save(temp)
